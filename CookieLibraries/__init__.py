@@ -7,3 +7,4 @@ import CookieLibraries.EventManager as EventManager
 import CookieLibraries.ModuleManager as ModuleManager
 import CookieLibraries.LoggerManager as LoggerManager
 import CookieLibraries.ConfigUtility as ConfigUtility
+import CookieLibraries.EventUtility as EventUtility
