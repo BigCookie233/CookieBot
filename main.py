@@ -39,17 +39,10 @@ def post_data():
         return "OK"
     request_list.append(data)
 
-    type_ = data['post_type']
-    if type_ + '_type' in data:
-        Lib.EventManager.Event((type_, data[type_ + '_type']), data)
-    else:
-        Lib.EventManager.Event(type_, data)
-
     if data['post_type'] == "message" and data['message_type'] == 'group':  # 如果是群聊信息
         username = data['sender']['nickname']  # 获取信息发送者的昵称
         if data['sender']['card'] != "":
-            username = data['sender']['card']  # 若用户设置
-            # 了群昵称则把用户名设为群昵称
+            username = data['sender']['card']  # 若用户设置了群昵称则把用户名设为群昵称
         group_name = api.get("/get_group_info", {"group_id": data['group_id']})["group_name"]
 
         message = QQRichText.cq_decode(data['raw_message'])

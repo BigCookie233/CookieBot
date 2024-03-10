@@ -5,13 +5,8 @@
 #  | |  | | |_| |  _ < (_| | | | | | | |_) | (_) | |_ / __/
 #  |_|  |_|\__,_|_| \_\__,_|_|_| |_| |____/ \___/ \__|_____|
 
-from Lib.MuRainLib import *
-import Lib.EventManager
 import Lib.OnebotAPI
 import Lib.QQRichText
-import Lib.EasyEventManager
-import Lib.ConfigManager
-import Lib.PluginManager
 
 VERSION = "2.0.0-dev"
 VERSION_WEEK = "24Y11A"
