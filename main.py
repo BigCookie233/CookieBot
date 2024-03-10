@@ -4,21 +4,17 @@
 #  | |\/| | | | | |_) / _` | | '_ \  |  _ \ / _ \| __| __) |
 #  | |  | | |_| |  _ < (_| | | | | | | |_) | (_) | |_ / __/
 #  |_|  |_|\__,_|_| \_\__,_|_|_| |_| |____/ \___/ \__|_____|
-import Lib.EventManager
-from Lib import *
-from flask import Flask, request
-import yaml
-import os
-import logging
-import threading
-import importlib
 import atexit
+from flask import Flask, request
 from werkzeug.serving import make_server
 
-logger = MuRainLib.log_init()
+from CookieLibraries import *
+from Lib import *
+
 VERSION = "2.0.0-dev"  # 版本
 VERSION_WEEK = "24W11A"  # 版本周
 
+logger = None
 plugins = {}  # 插件
 app = Flask(__name__)
 
@@ -31,18 +27,16 @@ request_list = []
 @atexit.register
 def finalize_and_cleanup():
     # TODO: 清理缓存文件等
-    logger.warning("MuRainBot结束运行！\n")
+    logger.info("MuRainBot结束运行！\n")
 
 
 # 上报
 @app.route('/', methods=["POST"])
 def post_data():
     data = request.get_json()
-    logger.debug(data)
     if data in request_list:
         return "OK"
-    else:
-        request_list.append(data)
+    request_list.append(data)
 
     type_ = data['post_type']
     if type_ + '_type' in data:
@@ -97,108 +91,46 @@ def post_data():
             elif type_ == "kick_me" or user_id == bot_uid:
                 logger.info("检测到Bot被%s踢出了群聊%s" % (oid, group_id))
 
-    # 插件
-    # TODO: 插件异步执行，替换多线程
-    for plugin in plugins.keys():
-        plugin_thread = threading.Thread(
-            target=plugins[plugin].main,
-            args=(
-                data,
-                work_path)
-        )
-        plugin_thread.start()
-
     return "OK"
 
 
-# 导入配置文件
-def load_config(yml_path):
-    try:
-        with open(yml_path, encoding="utf-8") as f:
-            file_content = f.read()
-        config = yaml.load(file_content, yaml.FullLoader)
-        # print(content)
-        logger.info("配置文件加载成功！")
-        return config
-    except FileNotFoundError or OSError:
-        logger.critical('配置文件加载失败！')
-        return None
-
-
 def load_plugins():
+    modules = []
+    for module_name in os.listdir("plugins"):
+        for suffix in [".py", ".pyc"]:
+            if module_name.endswith(suffix):
+                modules.append(module_name.split(".")[0])
+
     global plugins
-    # 获取插件目录下的所有文件
-    things_in_plugin_dir = os.listdir(plugins_path)
-
-    # 筛选出后缀为.py的文件
-    def mapper(name, plugin_suffix=None):
-        if plugin_suffix is None:
-            plugin_suffix = [".py", ".pyc"]
-        for i in plugin_suffix:
-            if name.endswith(i):
-                return name.split(".")[0]
-            else:
-                return ""
-
-    things_in_plugin_dir = map(mapper, things_in_plugin_dir)
-    things_in_plugin_dir = [_ for _ in things_in_plugin_dir if _ != ""]
-
     plugins = {}
 
-    for i in things_in_plugin_dir:
-        try:
-            plugins[i] = importlib.import_module('.' + i, package='plugins')
-        except Exception as e:
-            logger.error("导入插件 {} 失败！ 原因:{}".format(i, e))
-    return plugins
+    for module_name in modules:
+        module = ModuleManager.load_module("." + module_name, "plugins")
+        if module.instance is not None:
+            plugins[module_name] = module
 
 
 # 主函数
 if __name__ == '__main__':
     work_path = os.path.abspath(os.path.dirname(__file__))
     data_path = os.path.join(work_path, 'data')
-    yaml_path = os.path.join(work_path, 'config.yml')
-    plugins_path = os.path.join(work_path, "plugins")
 
+    LoggerManager.init("logs")
+    logger = LoggerManager.logger
     logger.info(f"MuRain Bot开始运行，当前版本：{VERSION}({VERSION_WEEK})")
-    logger.info("Github: https://github.com/xiaosuyyds/MuRainBot2/")
 
-    # 版本检测
-    if LibInfo().version == VERSION:
-        logger.info("MuRainLib版本校验成功！")
-    else:
-        logger.warning("MuRainLib版本检测未通过，可能会发生异常\n"
-                       f"MuRainLib版本:{LibInfo().version} MuRain Bot版本:{VERSION}\n"
-                       "注意：我们将不会受理在此模式下运行的报错")
-        if input("Continue?(Y/n)").lower() != "y":
-            sys.exit()
-        logger.warning("MuRainLib版本检测未通过，可能会发生异常，将继续运行！")
+    config = ConfigUtility.GlobalConfig()
 
-    logger.info("MuRainLib当前版本：{}({})".format(LibInfo().version, LibInfo().version_week))
-
-    config = load_config(yaml_path)
-
-    bot_uid = config["account"]["user_id"]
-    bot_name = config["account"]["nick_name"]
-    bot_admin = config["account"]["bot_admin"]
+    bot_uid = config.get_user_id()
+    bot_name = config.get_nick_name()
+    bot_admin = config.get_bot_admin()
 
     load_plugins()
-    if len(plugins) > 0:
-        logger.info("插件导入完成，共成功导入 {} 个插件".format(len(plugins)))
-        for plugin in plugins:
-            plugin_info = plugins[plugin].PluginInfo(config)
-            logger.info("%s 作者:%s", plugin_info.NAME, plugin_info.AUTHOR)
-    else:
-        logger.warning("无插件成功导入！")
-
-    logger.info("读取到监听服务器ip，将以此ip启动监听服务器: {}:{}"
-                .format(config["server"]["host"], config["server"]["port"]))
+    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(plugins)))
 
     # 设置API
-    api.set_ip(config["api"]["host"], config["api"]["port"])
-
-    logger.info("读取到监听api，将以此url调用API: {}"
-                .format(str(api)))
+    api.set_ip(config.get_api_host(), config.get_api_port())
+    logger.info("调用API: {}".format(str(api)))
 
     # 检测bot名称与botUID是否为空或未设置
     if bot_uid is None or bot_name == "" or bot_uid == 123456 or bot_name is None:
@@ -207,18 +139,15 @@ if __name__ == '__main__':
             bot_info = api.get("/get_login_info")
             bot_uid, bot_name = bot_info["user_id"], bot_info["nickname"]
         except (TypeError, ConnectionRefusedError):
-            logger.error("获取BotUID与昵称失败！可能会导致严重问题！")
-
-    logger.info("欢迎使用 {}({})".format(bot_name, bot_uid))
+            logger.error("获取BotUID与昵称失败！")
 
     # 禁用werkzeug的日志记录
-    log = logging.getLogger('werkzeug')
-    log.disabled = True
+    logging.getLogger('werkzeug').disabled = True
 
     # 启动监听服务器
     try:
-        logger.info("启动监听服务器")
-        server = make_server(config["server"]["host"], config["server"]["port"], app)
+        logger.info("启动监听服务器: {}:{}".format(config.get_server_host(), config.get_server_port()))
+        server = make_server(config.get_server_host(), config.get_server_port(), app)
         server.serve_forever()
     except:
         logger.error("监听服务器启动失败！")

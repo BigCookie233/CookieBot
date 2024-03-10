@@ -5,6 +5,7 @@
 import importlib
 
 import CookieLibraries.EventManager as EventManager
+import CookieLibraries.LoggerManager as LoggerManager
 
 
 class ModuleEvent(EventManager.Event):
@@ -12,14 +13,15 @@ class ModuleEvent(EventManager.Event):
         self.instance = instance
 
     def call(self):
-        module = EventManager.event_listeners[self.instance.__name__]
-        if self.__class__ in module:
-            for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
-                for listener in module[self.__class__][priority]:
-                    try:
-                        listener(self)
-                    except Exception as e:
-                        print(e)
+        if self.instance.__name__ in EventManager.event_listeners:
+            module = EventManager.event_listeners[self.instance.__name__]
+            if self.__class__ in module:
+                for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
+                    for listener in module[self.__class__][priority]:
+                        try:
+                            listener(self)
+                        except Exception as e:
+                            LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
 
 
 class ModuleEnableEvent(ModuleEvent):
@@ -46,8 +48,7 @@ class Module:
         except Exception as e:
             self.instance = None
             self.version = None
-            # TODO: 使用日志库打印异常信息
-            print(e)
+            LoggerManager.logger.error("Caught {} when load module: {} in {}".format(e, self.name, self.package))
 
     def enable(self):
         ModuleEnableEvent(self.instance).call()
@@ -60,3 +61,4 @@ def load_module(name, package="modules"):
     module = Module(name, package)
     module.load()
     module.enable()
+    return module

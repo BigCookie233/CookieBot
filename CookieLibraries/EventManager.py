@@ -5,6 +5,8 @@
 import inspect
 from enum import Enum
 
+import CookieLibraries.LoggerManager as LoggerManager
+
 event_listeners = {}
 
 
@@ -25,7 +27,7 @@ class Event:
                         try:
                             listener(self)
                         except Exception as e:
-                            print(e)
+                            LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
 
 
 class CancellableEvent(Event):
@@ -44,7 +46,7 @@ class CancellableEvent(Event):
                             try:
                                 listener(self)
                             except Exception as e:
-                                print(e)
+                                LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
 
 
 def event_listener(event_class, priority=Priority.NORMAL):
