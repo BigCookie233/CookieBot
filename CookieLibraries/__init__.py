@@ -4,4 +4,4 @@
 
 import CookieLibraries.ConfigManager
 import CookieLibraries.EventManager
-import CookieLibraries.PluginManager
+import CookieLibraries.ModuleManager
