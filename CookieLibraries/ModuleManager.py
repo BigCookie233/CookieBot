@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import importlib
+import os
 
 import CookieLibraries.EventManager as EventManager
 import CookieLibraries.LoggerManager as LoggerManager
@@ -62,3 +63,17 @@ def load_module(name, package="modules"):
     module.load()
     module.enable()
     return module
+
+
+modules = {}
+
+
+def load_modules(package):
+    global modules
+    for module_name in os.listdir(package):
+        for suffix in [".py", ".pyc"]:
+            if module_name.endswith(suffix):
+                module_name = module_name.split(".")[0]
+                module = load_module("." + module_name, package)
+                if module.instance is not None:
+                    modules[module_name] = module

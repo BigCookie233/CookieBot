@@ -7,6 +7,8 @@
 import atexit
 from flask import Flask, request
 from werkzeug.serving import make_server
+import logging
+import os
 
 from CookieLibraries import *
 from Lib import *
@@ -15,7 +17,6 @@ VERSION = "2.0.0-dev"  # 版本
 VERSION_WEEK = "24W11A"  # 版本周
 
 logger = None
-plugins = {}  # 插件
 app = Flask(__name__)
 
 api = OnebotAPI.OnebotAPI()
@@ -57,12 +58,6 @@ def post_data():
             group_name, data['group_id'], username, data['sender']['user_id'], message,
             data['message_id']))
 
-        # 获取群文件夹路径
-        grou_path = os.path.join(data_path, "groups", str(data['group_id']))
-        # 如果获取群文件夹路径不存在，则创建
-        if not os.path.exists(grou_path):
-            os.makedirs(grou_path)
-
         # 加群邀请
         if data['post_type'] == 'request' and data['request_type'] == 'group':
             logger.info("收到来自%s的加群邀请, 群号%s, flag:%s, 类型: %s" %
@@ -94,26 +89,9 @@ def post_data():
     return "OK"
 
 
-def load_plugins():
-    modules = []
-    for module_name in os.listdir("plugins"):
-        for suffix in [".py", ".pyc"]:
-            if module_name.endswith(suffix):
-                modules.append(module_name.split(".")[0])
-
-    global plugins
-    plugins = {}
-
-    for module_name in modules:
-        module = ModuleManager.load_module("." + module_name, "plugins")
-        if module.instance is not None:
-            plugins[module_name] = module
-
-
 # 主函数
 if __name__ == '__main__':
-    work_path = os.path.abspath(os.path.dirname(__file__))
-    data_path = os.path.join(work_path, 'data')
+    data_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
     LoggerManager.init("logs")
     logger = LoggerManager.logger
@@ -125,8 +103,8 @@ if __name__ == '__main__':
     bot_name = config.get_nick_name()
     bot_admin = config.get_bot_admin()
 
-    load_plugins()
-    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(plugins)))
+    ModuleManager.load_modules("plugins")
+    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(ModuleManager.modules)))
 
     # 设置API
     api.set_ip(config.get_api_host(), config.get_api_port())
