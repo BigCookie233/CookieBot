@@ -90,7 +90,7 @@ if __name__ == '__main__':
     logger = LoggerManager.logger
     logger.info(f"MuRain Bot开始运行，当前版本：{VERSION}({VERSION_WEEK})")
 
-    config = ConfigUtility.GlobalConfig()
+    config = Configs.GlobalConfig()
 
     bot_uid = config.get_user_id()
     bot_name = config.get_nick_name()
