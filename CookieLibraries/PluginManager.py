@@ -9,7 +9,7 @@ import CookieLibraries.EventManager as EventManager
 import CookieLibraries.LoggerManager as LoggerManager
 
 
-class ModuleEvent(EventManager.Event):
+class PluginEvent(EventManager.Event):
     def __init__(self, instance):
         self.instance = instance
 
@@ -19,23 +19,20 @@ class ModuleEvent(EventManager.Event):
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        try:
-                            listener(self)
-                        except Exception as e:
-                            LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
+                        listener(self)
 
 
-class ModuleEnableEvent(ModuleEvent):
+class PluginEnableEvent(PluginEvent):
     def __init__(self, instance):
         super().__init__(instance)
 
 
-class ModuleDisableEvent(ModuleEvent):
+class PluginDisableEvent(PluginEvent):
     def __init__(self, instance):
         super().__init__(instance)
 
 
-class Module:
+class Plugin:
     def __init__(self, name, package="modules"):
         self.version = None
         self.instance = None
@@ -49,17 +46,17 @@ class Module:
         except Exception as e:
             self.instance = None
             self.version = None
-            LoggerManager.logger.error("Caught {} when load module: {} in {}".format(e, self.name, self.package))
+            LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.name, e))
 
     def enable(self):
-        ModuleEnableEvent(self.instance).call()
+        PluginEnableEvent(self.instance).call()
 
     def disable(self):
-        ModuleDisableEvent(self.instance).call()
+        PluginDisableEvent(self.instance).call()
 
 
 def load_module(name, package="modules"):
-    module = Module(name, package)
+    module = Plugin(name, package)
     module.load()
     module.enable()
     return module
