@@ -24,10 +24,7 @@ class Event:
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        try:
-                            listener(self)
-                        except Exception as e:
-                            LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
+                        LoggerManager.exception_handler(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -42,14 +39,12 @@ class CancellableEvent(Event):
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        if not self.isCancelled:
-                            try:
-                                listener(self)
-                            except Exception as e:
-                                LoggerManager.logger.error("Caught {} when call listener: {}".format(e, listener))
+                        LoggerManager.exception_handler(listener)(self)
+                        if self.isCancelled:
+                            return None
 
 
-def event_listener(event_class, priority=Priority.NORMAL):
+def event_listener(event_class: type, priority: Priority = Priority.NORMAL):
     if not isinstance(event_class, type) or not issubclass(event_class, Event):
         raise TypeError("event_listener() arg 1 must be a event class")
     if not isinstance(priority, Priority):
@@ -64,3 +59,15 @@ def event_listener(event_class, priority=Priority.NORMAL):
         return func
 
     return wrapper
+
+
+def unregister_listener(func):
+    for module in event_listeners.values():
+        for clazz in module.values():
+            for listeners in clazz.values():
+                if func in listeners:
+                    listeners.remove(func)
+
+
+def unregister_module(module):
+    event_listeners.pop(module)

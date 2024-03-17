@@ -45,3 +45,14 @@ def init(logs_path):
     file_handler.suffix = "%Y-%m-%d.log"
     file_handler.setFormatter(logging.Formatter(fmt))
     logger.addHandler(file_handler)
+
+
+def exception_handler(func):
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            if isinstance(logger, logging.Logger):
+                logger.error("An error occurred while calling {}: {}".format(func, e))
+
+    return wrapper
