@@ -10,6 +10,7 @@ import sys
 import coloredlogs
 
 logger = None
+last_error = None
 
 
 def init(logs_path):
@@ -56,10 +57,14 @@ def init(logs_path):
 
 def exception_handler(func):
     def wrapper(*args, **kwargs):
+        global last_error
         try:
             func(*args, **kwargs)
         except Exception as e:
             if isinstance(logger, logging.Logger):
                 logger.error("An error occurred while calling {}: {}".format(func, e))
+            last_error = e
+        else:
+            last_error = None
 
     return wrapper

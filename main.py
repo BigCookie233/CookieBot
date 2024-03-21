@@ -5,6 +5,8 @@
 #  | |  | | |_| |  _ < (_| | | | | | | |_) | (_) | |_ / __/
 #  |_|  |_|\__,_|_| \_\__,_|_|_| |_| |____/ \___/ \__|_____|
 import atexit
+import sys
+
 from flask import Flask, request
 from werkzeug.serving import make_server
 import logging
@@ -90,14 +92,20 @@ if __name__ == '__main__':
     logger = LoggerManager.logger
     logger.info(f"MuRain Bot开始运行，当前版本：{VERSION}({VERSION_WEEK})")
 
+    def exit_if_error_occurred(exit_code = 0):
+        if LoggerManager.last_error is not None:
+            sys.exit(exit_code)
+
     config = Configs.GlobalConfig()
+    exit_if_error_occurred(1)
 
     bot_uid = config.get_user_id()
     bot_name = config.get_nick_name()
     bot_admin = config.get_bot_admin()
 
-    ModuleManager.load_modules("plugins")
-    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(ModuleManager.modules)))
+    PluginManager.load_modules("plugins")
+    exit_if_error_occurred(2)
+    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.modules)))
 
     # 设置API
     api.set_ip(config.get_api_host(), config.get_api_port())

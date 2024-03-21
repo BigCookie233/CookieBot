@@ -5,6 +5,7 @@
 import importlib
 import os
 
+import CookieLibraries.ConfigManager as ConfigManager
 import CookieLibraries.EventManager as EventManager
 import CookieLibraries.LoggerManager as LoggerManager
 
@@ -47,6 +48,9 @@ class Plugin:
             self.instance = None
             self.version = None
             LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.name, e))
+            LoggerManager.last_error = e
+        else:
+            LoggerManager.last_error = None
 
     def enable(self):
         PluginEnableEvent(self.instance).call()
@@ -55,11 +59,17 @@ class Plugin:
         PluginDisableEvent(self.instance).call()
 
 
+class PluginConfig(ConfigManager.Config):
+    def __init__(self, path):
+        super().__init__(path)
+
+
 def load_module(name, package="modules"):
     module = Plugin(name, package)
     module.load()
-    module.enable()
-    return module
+    if module.instance is not None:
+        module.enable()
+        modules[name] = module
 
 
 modules = {}
@@ -67,10 +77,13 @@ modules = {}
 
 def load_modules(package):
     global modules
-    for module_name in os.listdir(package):
-        for suffix in [".py", ".pyc"]:
-            if module_name.endswith(suffix):
-                module_name = module_name.split(".")[0]
-                module = load_module("." + module_name, package)
-                if module.instance is not None:
-                    modules[module_name] = module
+    try:
+        for module_name in os.listdir(package):
+            for suffix in [".py", ".pyc"]:
+                if module_name.endswith(suffix):
+                    load_module("." + module_name.split(".")[0], package)
+    except Exception as e:
+        LoggerManager.logger.error("An error occurred while loading plugins: {}".format(e))
+        LoggerManager.last_error = e
+    else:
+        LoggerManager.last_error = None
