@@ -6,11 +6,12 @@ import yaml
 
 from CookieLibraries import LoggerManager
 
+
 class Config:
-    def __init__(self, path):
+    def __init__(self, path, default_config=None):
         self.raw_config = None
         self.path = path
-        self.default_config = None
+        self.default_config = default_config
         self.encoding = "utf-8"
         self.reload()
 

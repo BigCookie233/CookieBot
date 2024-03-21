@@ -4,6 +4,7 @@
 
 import importlib
 import os
+import traceback
 
 import CookieLibraries.ConfigManager as ConfigManager
 import CookieLibraries.EventManager as EventManager
@@ -60,11 +61,13 @@ class Plugin:
 
 
 class PluginConfig(ConfigManager.Config):
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, default_config):
+        super().__init__(os.path.join("configs",
+                                      traceback.extract_stack()[-2].filename.rsplit(".", 1)[0] + ".yml"),
+                         default_config)
 
 
-def load_module(name, package="modules"):
+def load_module(name, package="plugins"):
     module = Plugin(name, package)
     module.load()
     if module.instance is not None:
