@@ -7,8 +7,16 @@ import CookieLibraries.PluginManager as PluginManager
 
 
 def onEnable(func):
-    return EventManager.event_listener(PluginManager.PluginEnableEvent)(func)
+    @EventManager.event_listener(PluginManager.PluginEnableEvent)
+    def wrapper(event):
+        func()
+
+    return wrapper
 
 
 def onDisable(func):
-    return EventManager.event_listener(PluginManager.PluginDisableEvent)(func)
+    @EventManager.event_listener(PluginManager.PluginDisableEvent)
+    def wrapper(event):
+        func()
+
+    return wrapper

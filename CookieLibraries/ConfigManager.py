@@ -2,31 +2,37 @@
 
 # Created by BigCookie233
 
+import os
+import traceback
+
 import yaml
 
 from CookieLibraries import LoggerManager
 
 
 class Config:
-    def __init__(self, path, default_config=None):
+    def __init__(self, path):
         self.raw_config = None
         self.path = path
-        self.default_config = default_config
         self.encoding = "utf-8"
-        self.reload()
 
-    @LoggerManager.exception_handler
+    @LoggerManager.log_exception
     def reload(self):
-        try:
-            with open(self.path, "r", encoding=self.encoding) as file:
-                self.raw_config = yaml.load(file.read(), yaml.FullLoader)
-        except FileNotFoundError:
-            if self.default_config is not None:
-                if isinstance(self.default_config, str):
-                    with open(self.path, "w", encoding=self.encoding) as file:
-                        file.write(self.default_config)
-                    self.raw_config = yaml.load(self.default_config, yaml.FullLoader)
-                else:
-                    raise TypeError("default config must be a string")
-            else:
-                raise FileNotFoundError("No such file and no default config set: {}".format(self.path))
+        with open(self.path, "r", encoding=self.encoding) as file:
+            self.raw_config = yaml.load(file.read(), yaml.FullLoader)
+        return self
+
+    @LoggerManager.log_exception
+    def save_default(self, default_config: str):
+        if isinstance(default_config, str):
+            if not os.path.exists(self.path):
+                with open(self.path, "w", encoding=self.encoding) as file:
+                    file.write(default_config)
+        else:
+            raise TypeError("default config must be a string")
+        return self
+
+
+class PluginConfig(Config):
+    def __init__(self):
+        super().__init__(os.path.join("configs", traceback.extract_stack()[-2].filename.rsplit(".", 1)[0] + ".yml"))

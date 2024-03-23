@@ -4,9 +4,7 @@
 
 import importlib
 import os
-import traceback
 
-import CookieLibraries.ConfigManager as ConfigManager
 import CookieLibraries.EventManager as EventManager
 import CookieLibraries.LoggerManager as LoggerManager
 
@@ -21,7 +19,7 @@ class PluginEvent(EventManager.Event):
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        LoggerManager.exception_handler(listener)(self)
+                        LoggerManager.log_exception(listener)(self)
 
 
 class PluginEnableEvent(PluginEvent):
@@ -35,36 +33,34 @@ class PluginDisableEvent(PluginEvent):
 
 
 class Plugin:
-    def __init__(self, name, package="modules"):
+    def __init__(self, module_name, package="plugins"):
+        self.name = None
         self.version = None
         self.instance = None
-        self.name = name
+        self.module_name = module_name
         self.package = package
 
     def load(self):
         try:
-            self.instance = importlib.import_module(name=self.name, package=self.package)
+            self.instance = importlib.import_module(name=self.module_name, package=self.package)
+            self.name = self.instance.PLUGIN_NAME
             self.version = self.instance.PLUGIN_VERSION
         except Exception as e:
-            self.instance = None
-            self.version = None
-            LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.name, e))
-            LoggerManager.last_error = e
-        else:
-            LoggerManager.last_error = None
+            self.unload()
+            LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
+
+    def unload(self):
+        self.instance = None
+        self.name = None
+        self.version = None
 
     def enable(self):
+        LoggerManager.logger.info("Enabling {} {}".format(self.name, self.version))
         PluginEnableEvent(self.instance).call()
 
     def disable(self):
+        LoggerManager.logger.info("Disabling {} {}".format(self.name, self.version))
         PluginDisableEvent(self.instance).call()
-
-
-class PluginConfig(ConfigManager.Config):
-    def __init__(self, default_config):
-        super().__init__(os.path.join("configs",
-                                      traceback.extract_stack()[-2].filename.rsplit(".", 1)[0] + ".yml"),
-                         default_config)
 
 
 def load_module(name, package="plugins"):
@@ -87,6 +83,4 @@ def load_modules(package):
                     load_module("." + module_name.split(".")[0], package)
     except Exception as e:
         LoggerManager.logger.error("An error occurred while loading plugins: {}".format(e))
-        LoggerManager.last_error = e
-    else:
-        LoggerManager.last_error = None
+        raise
