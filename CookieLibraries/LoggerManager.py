@@ -56,7 +56,6 @@ def init(logs_path):
 
 def log_exception(func):
     def wrapper(*args, **kwargs):
-        global last_error
         try:
             func(*args, **kwargs)
         except Exception as e:

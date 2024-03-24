@@ -1,12 +1,5 @@
 # coding:utf-8
-#   __  __       ____       _         ____        _   _____
-#  |  \/  |_   _|  _ \ __ _(_)_ __   | __ )  ___ | |_|___  \
-#  | |\/| | | | | |_) / _` | | '_ \  |  _ \ / _ \| __| __) |
-#  | |  | | |_| |  _ < (_| | | | | | | |_) | (_) | |_ / __/
-#  |_|  |_|\__,_|_| \_\__,_|_|_| |_| |____/ \___/ \__|_____|
 import atexit
-import sys
-
 from flask import Flask, request
 from werkzeug.serving import make_server
 import logging
@@ -92,23 +85,17 @@ if __name__ == '__main__':
     logger = LoggerManager.logger
     logger.info(f"MuRain Bot开始运行，当前版本：{VERSION}({VERSION_WEEK})")
 
-    def exit_if_error_occurred(exit_code = 0):
-        if LoggerManager.last_error is not None:
-            sys.exit(exit_code)
-
     config = Configs.GlobalConfig()
-    exit_if_error_occurred(1)
 
-    bot_uid = config.get_user_id()
-    bot_name = config.get_nick_name()
-    bot_admin = config.get_bot_admin()
+    bot_uid = config.user_id
+    bot_name = config.nick_name
+    bot_admin = config.bot_admin
 
     PluginManager.load_modules("plugins")
-    exit_if_error_occurred(2)
     logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.modules)))
 
     # 设置API
-    api.set_ip(config.get_api_host(), config.get_api_port())
+    api.set_ip(config.api_host, config.api_port)
     logger.info("调用API: {}".format(str(api)))
 
     # 检测bot名称与botUID是否为空或未设置
@@ -125,8 +112,8 @@ if __name__ == '__main__':
 
     # 启动监听服务器
     try:
-        logger.info("启动监听服务器: {}:{}".format(config.get_server_host(), config.get_server_port()))
-        server = make_server(config.get_server_host(), config.get_server_port(), app)
+        logger.info("启动监听服务器: {}:{}".format(config.server_host, config.server_port))
+        server = make_server(config.server_host, config.server_port, app)
         server.serve_forever()
     except:
         logger.error("监听服务器启动失败！")
