@@ -6,17 +6,28 @@ import CookieLibraries.EventManager as EventManager
 import CookieLibraries.PluginManager as PluginManager
 
 
-def on_enable(func):
-    @EventManager.event_listener(PluginManager.PluginEnableEvent)
-    def wrapper(event):
-        func()
+class ReceiveMessageEvent(EventManager.Event):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
 
-    return wrapper
+
+class ReceiveGroupMessageEvent(ReceiveMessageEvent):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+def on_enable(func):
+    return EventManager.event_listener(PluginManager.PluginEnableEvent)(func)
 
 
 def on_disable(func):
-    @EventManager.event_listener(PluginManager.PluginDisableEvent)
-    def wrapper(event):
-        func()
+    return EventManager.event_listener(PluginManager.PluginDisableEvent)(func)
 
-    return wrapper
+
+def on_message(func):
+    return EventManager.event_listener(ReceiveMessageEvent)(func)
+
+
+def on_group_message(func):
+    return EventManager.event_listener(ReceiveGroupMessageEvent)(func)

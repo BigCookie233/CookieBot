@@ -2,12 +2,13 @@
 
 # Created by BigCookie233
 
+import inspect
 import logging
 import logging.handlers as handlers
 import os
-import sys
 
 import coloredlogs
+import sys
 
 logger = None
 
@@ -54,13 +55,30 @@ def init(logs_path):
     logger.addHandler(file_handler)
 
 
-def log_exception(func):
-    def wrapper(*args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        except Exception as e:
-            if isinstance(logger, logging.Logger):
-                logger.error("An error occurred while calling {}: {}".format(func, e))
-            raise
+def exception_dispatcher(handler, block: bool = False):
+    if not callable(handler):
+        raise TypeError("the handler must be a callable object")
+    params_len = len(inspect.signature(handler).parameters)
+    if params_len != 1:
+        raise TypeError("the handler takes {} positional arguments but 1 and only 1 will be given".format(params_len))
+
+    def wrapper(func):
+        def dispatcher(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except Exception as e:
+                handler(e)
+                if not block:
+                    raise
+
+        return dispatcher
 
     return wrapper
+
+
+def log_exception(block=False):
+    def exception_logger(e):
+        if isinstance(logger, logging.Logger):
+            logger.error("An error occurred: {}".format(e))
+
+    return exception_dispatcher(exception_logger, block)

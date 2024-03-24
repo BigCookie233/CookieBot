@@ -1,9 +1,10 @@
 # coding:utf-8
+import logging
+import os
+
 import atexit
 from flask import Flask, request
 from werkzeug.serving import make_server
-import logging
-import os
 
 from CookieLibraries import *
 from Lib import *
@@ -15,8 +16,6 @@ logger = None
 app = Flask(__name__)
 
 api = OnebotAPI.OnebotAPI()
-
-request_list = []
 
 
 # 结束运行
@@ -30,49 +29,48 @@ def finalize_and_cleanup():
 @app.route('/', methods=["POST"])
 def post_data():
     data = request.get_json()
-    if data in request_list:
-        return "OK"
-    request_list.append(data)
 
     if data['post_type'] == "message" and data['message_type'] == 'group':  # 如果是群聊信息
         username = data['sender']['nickname']  # 获取信息发送者的昵称
         if data['sender']['card'] != "":
             username = data['sender']['card']  # 若用户设置了群昵称则把用户名设为群昵称
-        group_name = api.get("/get_group_info", {"group_id": data['group_id']})["group_name"]
+        # group_name = api.get("/get_group_info", {"group_id": data['group_id']})["group_name"]
+        # message = QQRichText.cq_decode(data['raw_message'])
+        message = MessageManager.ReceivedGroupMessage(data['raw_message'], data['message_id'], data['sender'],
+                                                      data['group_id'])
 
-        message = QQRichText.cq_decode(data['raw_message'])
+        logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
+            message.group_id, message.sender["nickname"], message.sender['user_id'], message.raw_message,
+            message.message_id))
+        Events.ReceiveGroupMessageEvent(message).call()
 
-        logger.info("收到群 %s(%s) 内 %s(%s) 的消息: %s (%s)" % (
-            group_name, data['group_id'], username, data['sender']['user_id'], message,
-            data['message_id']))
-
-        # 加群邀请
-        if data['post_type'] == 'request' and data['request_type'] == 'group':
-            logger.info("收到来自%s的加群邀请, 群号%s, flag:%s, 类型: %s" %
-                        (data['user_id'], data['group_id'], data['flag'], data['sub_type']))
-
-        # 戳一戳
-        if data['post_type'] == "notice" and data['notice_type'] == 'notify':
-            logger.info("检测到群号为%s内，%s戳了戳%s" %
-                        (data['group_id'], data['user_id'], data['target_id']))
-
-        # 进群聊
-        if data['post_type'] == "notice" and data['notice_type'] == "group_increase":
-            logger.info("检测到群号为%s内，%s进群了，操作者%s" %
-                        (data['group_id'], data['user_id'], data['operator_id']))
-
-        # 退群聊
-        if data['post_type'] == "notice" and data['notice_type'] == "group_decrease":
-            type_ = data['sub_type']
-            oid = data['operator_id']
-            group_id = data['group_id']
-            user_id = data['user_id']
-            if type_ == "leave":
-                logger.info("检测到%s退出了群聊%s" % (user_id, group_id))
-            elif type_ == "kick":
-                logger.info("检测到%s被%s踢出了群聊%s" % (user_id, oid, group_id))
-            elif type_ == "kick_me" or user_id == bot_uid:
-                logger.info("检测到Bot被%s踢出了群聊%s" % (oid, group_id))
+        # # 加群邀请
+        # if data['post_type'] == 'request' and data['request_type'] == 'group':
+        #     logger.info("收到来自%s的加群邀请, 群号%s, flag:%s, 类型: %s" %
+        #                 (data['user_id'], data['group_id'], data['flag'], data['sub_type']))
+        #
+        # # 戳一戳
+        # if data['post_type'] == "notice" and data['notice_type'] == 'notify':
+        #     logger.info("检测到群号为%s内，%s戳了戳%s" %
+        #                 (data['group_id'], data['user_id'], data['target_id']))
+        #
+        # # 进群聊
+        # if data['post_type'] == "notice" and data['notice_type'] == "group_increase":
+        #     logger.info("检测到群号为%s内，%s进群了，操作者%s" %
+        #                 (data['group_id'], data['user_id'], data['operator_id']))
+        #
+        # # 退群聊
+        # if data['post_type'] == "notice" and data['notice_type'] == "group_decrease":
+        #     type_ = data['sub_type']
+        #     oid = data['operator_id']
+        #     group_id = data['group_id']
+        #     user_id = data['user_id']
+        #     if type_ == "leave":
+        #         logger.info("检测到%s退出了群聊%s" % (user_id, group_id))
+        #     elif type_ == "kick":
+        #         logger.info("检测到%s被%s踢出了群聊%s" % (user_id, oid, group_id))
+        #     elif type_ == "kick_me" or user_id == bot_uid:
+        #         logger.info("检测到Bot被%s踢出了群聊%s" % (oid, group_id))
 
     return "OK"
 
@@ -95,6 +93,7 @@ if __name__ == '__main__':
     logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.modules)))
 
     # 设置API
+    BotController.init()
     api.set_ip(config.api_host, config.api_port)
     logger.info("调用API: {}".format(str(api)))
 

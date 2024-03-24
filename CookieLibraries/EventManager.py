@@ -24,7 +24,7 @@ class Event:
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(listener)(self)
+                        LoggerManager.log_exception(True)(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -39,7 +39,7 @@ class CancellableEvent(Event):
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(listener)(self)
+                        LoggerManager.log_exception(True)(listener)(self)
                         if self.isCancelled:
                             return None
 
@@ -51,8 +51,10 @@ def event_listener(event_class: type, priority: Priority = Priority.NORMAL):
         raise TypeError("event_listener() arg 2 must be a priority")
 
     def wrapper(func):
-        if len(inspect.signature(func).parameters) != 1:
-            raise TypeError("The listener takes 0 positional arguments but 1 will be given")
+        params_len = len(inspect.signature(func).parameters)
+        if params_len != 1:
+            raise TypeError(
+                "the listener takes {} positional arguments but 1 and only 1 will be given".format(params_len))
         (event_listeners.setdefault(func.__module__, {})
          .setdefault(event_class, dict())
          .setdefault(priority, []).append(func))

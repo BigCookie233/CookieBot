@@ -19,7 +19,7 @@ class PluginEvent(EventManager.Event):
             if self.__class__ in module:
                 for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
                     for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(listener)(self)
+                        LoggerManager.log_exception(True)(listener)(self)
 
 
 class PluginEnableEvent(PluginEvent):
