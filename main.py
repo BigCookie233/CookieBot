@@ -6,6 +6,7 @@ import atexit
 from flask import Flask, request
 from werkzeug.serving import make_server
 
+import CookieLibraries.Configs
 from CookieLibraries import *
 from Lib import *
 
@@ -83,7 +84,8 @@ if __name__ == '__main__':
     logger = LoggerManager.logger
     logger.info(f"MuRain Bot开始运行，当前版本：{VERSION}({VERSION_WEEK})")
 
-    config = Configs.GlobalConfig()
+    Configs.global_config = Configs.GlobalConfig()
+    config = Configs.global_config
 
     bot_uid = config.user_id
     bot_name = config.nick_name
@@ -96,6 +98,8 @@ if __name__ == '__main__':
     BotController.init()
     api.set_ip(config.api_host, config.api_port)
     logger.info("调用API: {}".format(str(api)))
+
+    ThreadPool.init()
 
     # 检测bot名称与botUID是否为空或未设置
     if bot_uid is None or bot_name == "" or bot_uid == 123456 or bot_name is None:

@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import CookieLibraries.BotController as BotController
+import CookieLibraries.Events as Events
 
 
 # Message Segment Classes
@@ -101,7 +102,7 @@ class Message:
         return chain
 
     def send_to_group(self, group_id):
-        BotController.send_group_message(group_id, self.build_chain())
+        Events.SendGroupMessageEvent(self.build_chain(), group_id).call()
 
 
 class ReceivedMessage(Message):

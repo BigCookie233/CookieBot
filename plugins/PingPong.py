@@ -12,5 +12,6 @@ logger = CookieLibraries.LoggerManager.logger
 
 @CookieLibraries.Events.on_group_message
 def on_message(event: CookieLibraries.Events.ReceiveGroupMessageEvent):
-    if event.message.raw_message == "[CQ:at,qq=629596434] ping":
-        CookieLibraries.MessageManager.Message("pong!").send_to_group(event.message.group_id)
+    msg = event.message
+    if msg.segment_chain[0] == "ping!":
+        CookieLibraries.MessageManager.Message().at(msg.sender["user_id"]).text(" pong!").send_to_group(msg.group_id)

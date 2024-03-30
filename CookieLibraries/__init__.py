@@ -8,5 +8,7 @@ import CookieLibraries.PluginManager as PluginManager
 import CookieLibraries.LoggerManager as LoggerManager
 import CookieLibraries.BotController as BotController
 import CookieLibraries.MessageManager as MessageManager
+import CookieLibraries.ExceptionHandler as ExceptionHandler
+import CookieLibraries.ThreadPool as ThreadPool
 import CookieLibraries.Configs as Configs
 import CookieLibraries.Events as Events
