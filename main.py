@@ -36,11 +36,11 @@ def post_data():
             username = data['sender']['card']  # 若用户设置了群昵称则把用户名设为群昵称
         # group_name = api.get("/get_group_info", {"group_id": data['group_id']})["group_name"]
         # message = QQRichText.cq_decode(data['raw_message'])
-        message = MessageManager.ReceivedGroupMessage(data['raw_message'], data['message_id'], data['sender'],
+        message = MessageManager.ReceivedGroupMessage(data['message'], data['message_id'], data['sender'],
                                                       data['group_id'])
 
         logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
-            message.group_id, message.sender["nickname"], message.sender['user_id'], message.raw_message,
+            message.group_id, message.sender["nickname"], message.sender['user_id'], data['raw_message'],
             message.message_id))
         Events.ReceiveGroupMessageEvent(message).call()
 
@@ -89,8 +89,8 @@ if __name__ == '__main__':
     bot_name = config.nick_name
     bot_admin = config.bot_admin
 
-    PluginManager.load_modules("plugins")
-    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.modules)))
+    PluginManager.load_plugins("plugins")
+    logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.plugins)))
 
     # 设置API
     BotController.init()

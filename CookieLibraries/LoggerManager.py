@@ -65,7 +65,7 @@ def exception_dispatcher(handler, block: bool = False):
     def wrapper(func):
         def dispatcher(*args, **kwargs):
             try:
-                func(*args, **kwargs)
+                return func(*args, **kwargs)
             except Exception as e:
                 handler(e)
                 if not block:

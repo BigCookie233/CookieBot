@@ -63,24 +63,24 @@ class Plugin:
         PluginDisableEvent(self.instance).call()
 
 
-def load_module(name, package="plugins"):
+def load_plugin(name, package="plugins"):
     module = Plugin(name, package)
     module.load()
     if module.instance is not None:
         module.enable()
-        modules[name] = module
+        plugins[name] = module
 
 
-modules = {}
+plugins = {}
 
 
-def load_modules(package):
-    global modules
+def load_plugins(package):
+    global plugins
     try:
-        for module_name in os.listdir(package):
+        for plugin_name in os.listdir(package):
             for suffix in [".py", ".pyc"]:
-                if module_name.endswith(suffix):
-                    load_module("." + module_name.split(".")[0], package)
+                if plugin_name.endswith(suffix):
+                    load_plugin("." + plugin_name.split(".")[0], package)
     except Exception as e:
         LoggerManager.logger.error("An error occurred while loading plugins: {}".format(e))
         raise

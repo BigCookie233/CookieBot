@@ -7,7 +7,7 @@ import traceback
 
 import yaml
 
-from CookieLibraries import LoggerManager
+import CookieLibraries.LoggerManager as LoggerManager
 
 
 class Config:

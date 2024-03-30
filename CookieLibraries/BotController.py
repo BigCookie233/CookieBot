@@ -17,9 +17,9 @@ def init():
 
 
 @LoggerManager.log_exception(True)
-def send_request(node: str, params):
+def send_request(node: str, json):
     if isinstance(base_url, str):
-        response = requests.get(base_url + node, params=params)
+        response = requests.post(base_url + node, json=json)
         return response.json()["data"]
 
 
