@@ -11,6 +11,9 @@ event_listeners = {}
 
 
 class Priority(Enum):
+    """
+    Available priorities
+    """
     HIGHEST = 0
     HIGH = 1
     NORMAL = 2
@@ -19,7 +22,13 @@ class Priority(Enum):
 
 
 class Event:
+    """
+    Event base class
+    """
     def call(self):
+        """
+        Call event
+        """
         for module in event_listeners.values():
             for clazz in module:
                 if issubclass(self.__class__, clazz):
@@ -29,13 +38,22 @@ class Event:
 
 
 class CancellableEvent(Event):
+    """
+    Cancellable event base class
+    """
     def __init__(self):
         self.isCancelled = False
 
     def cancel(self):
+        """
+        Cancel event
+        """
         self.isCancelled = True
 
     def call(self):
+        """
+        Call event
+        """
         for module in event_listeners.values():
             for clazz in module:
                 if issubclass(self.__class__, clazz):
@@ -47,6 +65,13 @@ class CancellableEvent(Event):
 
 
 def event_listener(event_class: type, priority: Priority = Priority.NORMAL):
+    """
+    Register event listener
+
+    Args:
+        event_class (type): The event
+        priority (Priority): The priority of this listener
+    """
     if not isinstance(event_class, type) or not issubclass(event_class, Event):
         raise TypeError("event_listener() arg 1 must be a event class")
     if not isinstance(priority, Priority):
@@ -66,6 +91,12 @@ def event_listener(event_class: type, priority: Priority = Priority.NORMAL):
 
 
 def unregister_listener(func):
+    """
+    Unregister event listener
+
+    Args:
+        func: The listener
+    """
     for module in event_listeners.values():
         for clazz in module.values():
             for listeners in clazz.values():
@@ -74,4 +105,10 @@ def unregister_listener(func):
 
 
 def unregister_module(module):
+    """
+    Unregister all listeners of a module
+
+    Args:
+        module: The module
+    """
     event_listeners.pop(module)
