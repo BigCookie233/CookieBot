@@ -5,9 +5,9 @@
 import requests
 
 import CookieLibraries.Configs as Configs
+import CookieLibraries.EventManager as EventManager
 import CookieLibraries.Events as Events
 import CookieLibraries.LoggerManager as LoggerManager
-import CookieLibraries.EventManager as EventManager
 import CookieLibraries.ThreadPool as ThreadPool
 
 base_url = None
@@ -27,6 +27,6 @@ def send_request(node: str, json):
         return response.json()["data"]
 
 
-@EventManager.event_listener(Events.SendGroupMessageEvent, EventManager.Priority.LOWEST)
-def group_message_sender(event: Events.SendGroupMessageEvent):
-    send_request("send_group_msg", {"group_id": event.group_id, "message": event.message})
+@EventManager.event_listener(Events.ActionEvent, EventManager.Priority.LOWEST)
+def group_message_sender(event: Events.ActionEvent):
+    send_request(event.action, event.data)

@@ -11,11 +11,13 @@ class MessageSegment:
     def __init__(self, msg_type):
         self.msg_type = msg_type
 
-    def build_data(self):
-        pass
+    @property
+    def data(self) -> dict:
+        return {}
 
-    def build_dict(self):
-        return {"type": self.msg_type, "data": self.build_data()}
+    @property
+    def raw_segment(self) -> dict:
+        return {"type": self.msg_type, "data": self.data}
 
 
 class TextSegment(MessageSegment):
@@ -23,7 +25,8 @@ class TextSegment(MessageSegment):
         self.text = text
         super().__init__("text")
 
-    def build_data(self):
+    @property
+    def data(self):
         return {"text": self.text}
 
     def __eq__(self, other):
@@ -34,12 +37,13 @@ class TextSegment(MessageSegment):
 
 
 class FaceSegment(MessageSegment):
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, face_id):
+        self.face_id = face_id
         super().__init__("face")
 
-    def build_data(self):
-        return {"id": self.id}
+    @property
+    def data(self):
+        return {"id": self.face_id}
 
 
 class ImageSegment(MessageSegment):
@@ -47,7 +51,8 @@ class ImageSegment(MessageSegment):
         self.file = file
         super().__init__("image")
 
-    def build_data(self):
+    @property
+    def data(self):
         return {"file": self.file}
 
 
@@ -56,17 +61,19 @@ class AtSegment(MessageSegment):
         self.qq = qq
         super().__init__("at")
 
-    def build_data(self):
+    @property
+    def data(self):
         return {"qq": str(self.qq)}
 
 
 class ReplySegment(MessageSegment):
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, msg_id):
+        self.msg_id = msg_id
         super().__init__("reply")
 
-    def build_data(self):
-        return {"id": self.id}
+    @property
+    def data(self):
+        return {"id": self.msg_id}
 
 
 # Message Classes
@@ -80,8 +87,8 @@ class Message:
         self.segment_chain.append(TextSegment(text))
         return self
 
-    def face(self, id):
-        self.segment_chain.append(FaceSegment(id))
+    def face(self, face_id):
+        self.segment_chain.append(FaceSegment(face_id))
         return self
 
     def image(self, file):
@@ -92,36 +99,38 @@ class Message:
         self.segment_chain.append(AtSegment(qq))
         return self
 
-    def reply(self, id):
-        self.segment_chain.append(ReplySegment(id))
+    def reply(self, msg_id):
+        self.segment_chain.append(ReplySegment(msg_id))
 
-    def build_chain(self):
+    @property
+    def raw_message(self):
         chain = []
-        for segment in self.segment_chain:
-            chain.append(segment.build_dict())
+        for seg in self.segment_chain:
+            chain.append(seg.raw_segment)
         return chain
 
     def send_to_group(self, group_id):
-        Events.SendGroupMessageEvent(self.build_chain(), group_id).call()
+        Events.SendGroupMessageEvent(self.raw_message, group_id).call()
+
+
+parser_map = {
+    "text": lambda data: TextSegment(data["text"]),
+    "face": lambda data: FaceSegment(data["id"]),
+    "image": lambda data: ImageSegment(data["file"]),
+    "at": lambda data: AtSegment(data["qq"]),
+    "reply": lambda data: ReplySegment(data["id"])
+}
 
 
 class ReceivedMessage(Message):
     def __init__(self, raw_msg, msg_id, sender):
-        segment_chain = []
-        for segment in raw_msg:
-            msg_type = segment["type"]
-            data = segment["data"]
-            if msg_type == "text":
-                segment_chain.append(TextSegment(data["text"]))
-            elif msg_type == "face":
-                segment_chain.append(FaceSegment(data["id"]))
-            elif msg_type == "image":
-                segment_chain.append(ImageSegment(data["file"]))
-            elif msg_type == "at":
-                segment_chain.append(TextSegment(data["qq"]))
-            elif msg_type == "reply":
-                segment_chain.append(TextSegment(data["id"]))
-        super().__init__(segment_chain)
+        chain = []
+        for seg in raw_msg:
+            msg_type = seg["type"]
+            data = seg["data"]
+            if msg_type in parser_map.keys():
+                chain.append(parser_map[msg_type](data))
+        super().__init__(chain)
         self.message_id = msg_id
         self.sender = sender
 

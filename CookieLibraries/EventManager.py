@@ -21,10 +21,11 @@ class Priority(Enum):
 class Event:
     def call(self):
         for module in event_listeners.values():
-            if self.__class__ in module:
-                for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
-                    for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(True)(listener)(self)
+            for clazz in module:
+                if issubclass(self.__class__, clazz):
+                    for priority in sorted(module[clazz].keys(), key=lambda x: x.value):
+                        for listener in module[clazz][priority]:
+                            LoggerManager.log_exception(True)(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -36,12 +37,13 @@ class CancellableEvent(Event):
 
     def call(self):
         for module in event_listeners.values():
-            if self.__class__ in module:
-                for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
-                    for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(True)(listener)(self)
-                        if self.isCancelled:
-                            return None
+            for clazz in module:
+                if issubclass(self.__class__, clazz):
+                    for priority in sorted(module[clazz].keys(), key=lambda x: x.value):
+                        for listener in module[clazz][priority]:
+                            LoggerManager.log_exception(True)(listener)(self)
+                            if self.isCancelled:
+                                return None
 
 
 def event_listener(event_class: type, priority: Priority = Priority.NORMAL):

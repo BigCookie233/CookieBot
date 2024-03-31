@@ -12,22 +12,30 @@ class ReceiveMessageEvent(EventManager.Event):
         self.message = message
 
 
-class SendMessageEvent(EventManager.Event):
-    def __init__(self, message):
-        super().__init__()
-        self.message = message
-
-
 class ReceiveGroupMessageEvent(ReceiveMessageEvent):
     def __init__(self, message):
         super().__init__(message)
 
 
-class SendGroupMessageEvent(EventManager.Event):
-    def __init__(self, message, group_id):
+class ActionEvent(EventManager.CancellableEvent):
+    def __init__(self, action):
         super().__init__()
+        self.action = action
+
+    @property
+    def data(self) -> dict:
+        return {}
+
+
+class SendGroupMessageEvent(ActionEvent):
+    def __init__(self, message, group_id):
+        super().__init__("send_group_msg")
         self.message = message
         self.group_id = group_id
+
+    @property
+    def data(self) -> dict:
+        return {"group_id": self.group_id, "message": self.message}
 
 
 def on_enable(func):
@@ -40,10 +48,6 @@ def on_disable(func):
 
 def on_message(func):
     return EventManager.event_listener(ReceiveMessageEvent)(func)
-
-
-def on_message_send(func):
-    return EventManager.event_listener(SendMessageEvent)(func)
 
 
 def on_group_message(func):
