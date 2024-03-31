@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import requests
+import importlib
 
 import CookieLibraries.Configs as Configs
 import CookieLibraries.EventManager as EventManager
@@ -15,7 +16,7 @@ base_url = None
 
 def init():
     global base_url
-    config = Configs.GlobalConfig()
+    config = importlib.import_module(name="CookieLibraries.Configs").GlobalConfig()
     base_url = "http://{}:{}/".format(config.api_host, config.api_port)
 
 
