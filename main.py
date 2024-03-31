@@ -3,26 +3,23 @@ import logging
 import os
 
 import atexit
+import requests
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-import CookieLibraries.Configs
 from CookieLibraries import *
-from Lib import *
 
 VERSION = "2.0.0-dev"  # 版本
 VERSION_WEEK = "24W11A"  # 版本周
 
 logger = None
-app = Flask(__name__)
-
-api = OnebotAPI.OnebotAPI()
+app = Flask("CookieBot")
 
 
 # 结束运行
 @atexit.register
 def finalize_and_cleanup():
-    # TODO: 清理缓存文件等
+    ThreadPool.thread_pool.shutdown()
     logger.info("MuRainBot结束运行！\n")
 
 
@@ -87,28 +84,16 @@ if __name__ == '__main__':
     Configs.global_config = Configs.GlobalConfig()
     config = Configs.global_config
 
-    bot_uid = config.user_id
-    bot_name = config.nick_name
-    bot_admin = config.bot_admin
-
     PluginManager.load_plugins("plugins")
     logger.info("插件导入完成，共成功导入 {} 个插件".format(len(PluginManager.plugins)))
 
-    # 设置API
     BotController.init()
-    api.set_ip(config.api_host, config.api_port)
-    logger.info("调用API: {}".format(str(api)))
-
     ThreadPool.init()
 
-    # 检测bot名称与botUID是否为空或未设置
-    if bot_uid is None or bot_name == "" or bot_uid == 123456 or bot_name is None:
-        logger.warning("配置文件中未找到BotUID或昵称，将自动获取！")
-        try:
-            bot_info = api.get("/get_login_info")
-            bot_uid, bot_name = bot_info["user_id"], bot_info["nickname"]
-        except (TypeError, ConnectionRefusedError):
-            logger.error("获取BotUID与昵称失败！")
+    bot_info = BotController.send_get_request("get_login_info")
+    if bot_info is None:
+        logger.error("获取BotUID与昵称失败！")
+    bot_uid, bot_name = bot_info["user_id"], bot_info["nickname"]
 
     # 禁用werkzeug的日志记录
     logging.getLogger('werkzeug').disabled = True

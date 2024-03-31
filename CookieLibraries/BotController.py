@@ -21,12 +21,18 @@ def init():
 
 @ThreadPool.async_task
 @LoggerManager.log_exception(True)
-def send_request(node: str, json):
+def send_post_request(node: str, json):
     if isinstance(base_url, str):
         response = requests.post(base_url + node, json=json)
         return response.json()["data"]
 
 
+def send_get_request(node: str):
+    if isinstance(base_url, str):
+        response = requests.get(base_url + node)
+        return response.json()["data"]
+
+
 @EventManager.event_listener(Events.ActionEvent, EventManager.Priority.LOWEST)
 def group_message_sender(event: Events.ActionEvent):
-    send_request(event.action, event.data)
+    send_post_request(event.action, event.data)
