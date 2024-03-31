@@ -1,7 +1,6 @@
 # coding:utf-8
 import logging
 
-import atexit
 from flask import Flask, request
 from werkzeug.serving import make_server
 
@@ -9,14 +8,6 @@ from CookieLibraries import *
 
 VERSION = "2.1.0-dev"
 app = Flask("CookieBot")
-
-
-# 结束运行
-@atexit.register
-def finalize_and_cleanup():
-    logger.info("Closing Thread Pool")
-    ThreadPool.thread_pool.shutdown()
-    logger.info("Goodbye!")
 
 
 # 上报
@@ -70,4 +61,6 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error("Cannot start server: {}".format(e))
     finally:
-        logger.info("Closing Server")
+        logger.info("Closing Thread Pool")
+        ThreadPool.thread_pool.shutdown()
+        logger.info("Goodbye!")

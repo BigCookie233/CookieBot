@@ -5,6 +5,7 @@
 import logging
 import logging.handlers as handlers
 import os
+import traceback
 
 import coloredlogs
 import sys
@@ -60,5 +61,13 @@ def log_exception(block=False):
     def exception_logger(e):
         if isinstance(logger, logging.Logger):
             logger.error("An error occurred: {}".format(e))
+
+    return ExceptionHandler.exception_dispatcher(exception_logger, block)
+
+
+def traceback_exception(block=False):
+    def exception_logger(e):
+        if isinstance(logger, logging.Logger):
+            logger.error(traceback.format_exc())
 
     return ExceptionHandler.exception_dispatcher(exception_logger, block)

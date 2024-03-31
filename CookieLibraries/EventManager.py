@@ -25,7 +25,7 @@ class Event:
                 if issubclass(self.__class__, clazz):
                     for priority in sorted(module[clazz].keys(), key=lambda x: x.value):
                         for listener in module[clazz][priority]:
-                            LoggerManager.log_exception(True)(listener)(self)
+                            LoggerManager.traceback_exception(True)(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -41,7 +41,7 @@ class CancellableEvent(Event):
                 if issubclass(self.__class__, clazz):
                     for priority in sorted(module[clazz].keys(), key=lambda x: x.value):
                         for listener in module[clazz][priority]:
-                            LoggerManager.log_exception(True)(listener)(self)
+                            LoggerManager.traceback_exception(True)(listener)(self)
                             if self.isCancelled:
                                 return None
 
