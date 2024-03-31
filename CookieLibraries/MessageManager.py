@@ -2,7 +2,6 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.BotController as BotController
 import CookieLibraries.Events as Events
 
 
@@ -11,6 +10,12 @@ class MessageSegment:
     def __init__(self, msg_type):
         self.msg_type = msg_type
 
+    def extend(self, other):
+        if isinstance(other, MessageSegment):
+            return Message([self, other])
+        elif isinstance(other, Message):
+            return Message([self].extend(other.segment_chain))
+
     @property
     def data(self) -> dict:
         return {}
@@ -18,6 +23,9 @@ class MessageSegment:
     @property
     def raw_segment(self) -> dict:
         return {"type": self.msg_type, "data": self.data}
+
+    def __add__(self, other):
+        return self.extend(other)
 
 
 class TextSegment(MessageSegment):
@@ -78,10 +86,10 @@ class ReplySegment(MessageSegment):
 
 # Message Classes
 class Message:
-    def __init__(self, segment_chain=None):
-        if segment_chain is None:
-            segment_chain = []
-        self.segment_chain = segment_chain
+    def __init__(self, seg_chain=None):
+        if seg_chain is None:
+            seg_chain = []
+        self.segment_chain = seg_chain
 
     def text(self, text):
         self.segment_chain.append(TextSegment(text))
@@ -102,6 +110,17 @@ class Message:
     def reply(self, msg_id):
         self.segment_chain.append(ReplySegment(msg_id))
 
+    def send_to_group(self, group_id):
+        Events.SendGroupMessageEvent(self.raw_message, group_id).call()
+
+    def extend(self, other):
+        if isinstance(other, MessageSegment):
+            self.segment_chain.append(other)
+            return self
+        elif isinstance(other, Message):
+            self.segment_chain.extend(other.segment_chain)
+            return self
+
     @property
     def raw_message(self):
         chain = []
@@ -109,8 +128,8 @@ class Message:
             chain.append(seg.raw_segment)
         return chain
 
-    def send_to_group(self, group_id):
-        Events.SendGroupMessageEvent(self.raw_message, group_id).call()
+    def __add__(self, other):
+        return self.extend(other)
 
 
 parser_map = {
