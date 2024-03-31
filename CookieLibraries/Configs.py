@@ -4,7 +4,6 @@
 
 import CookieLibraries.ConfigManager as ConfigManager
 
-global_config = None
 bot_profile = None
 
 

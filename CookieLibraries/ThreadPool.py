@@ -3,15 +3,14 @@
 # Created by BigCookie233
 
 from concurrent.futures import ThreadPoolExecutor
-
-import CookieLibraries.Configs as Configs
+import importlib
 
 thread_pool = None
 
 
 def init():
     global thread_pool
-    config = Configs.global_config
+    config = importlib.import_module(name="CookieLibraries.Configs").GlobalConfig()
     thread_pool = ThreadPoolExecutor(max_workers=config.max_workers)
 
 

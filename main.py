@@ -35,8 +35,7 @@ if __name__ == '__main__':
     logger = LoggerManager.logger
     logger.info("Starting up CookieBot {}".format(VERSION))
     # Load Config
-    Configs.global_config = Configs.GlobalConfig()
-    config = Configs.global_config
+    config = Configs.GlobalConfig()
     # Load Plugins
     logger.info("Loading plugins...")
     PluginManager.load_plugins("plugins")

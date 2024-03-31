@@ -15,7 +15,7 @@ base_url = None
 
 def init():
     global base_url
-    config = Configs.global_config
+    config = Configs.GlobalConfig()
     base_url = "http://{}:{}/".format(config.api_host, config.api_port)
 
 
