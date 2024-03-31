@@ -7,7 +7,6 @@
 /dataSources/
 /dataSources.local.xml
 
-*.log
+/logs
 /.idea
 *.pyc
-test.py

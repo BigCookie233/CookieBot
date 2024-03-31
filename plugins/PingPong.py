@@ -2,16 +2,16 @@
 
 # Created by BigCookie233
 
-import CookieLibraries
+from CookieLibraries import *
 
 PLUGIN_NAME = "PingPong"
-PLUGIN_VERSION = "v0.1 SNAPSHOT"
+PLUGIN_VERSION = "v1.0 SNAPSHOT"
 
-logger = CookieLibraries.LoggerManager.logger
+logger = LoggerManager.logger
 
 
-@CookieLibraries.Events.on_group_message
-def on_message(event: CookieLibraries.Events.ReceiveGroupMessageEvent):
+@Events.on_group_message
+def on_message(event: Events.ReceiveGroupMessageEvent):
     msg = event.message
     if msg.segment_chain[0] == "ping!":
-        CookieLibraries.MessageManager.Message().at(msg.sender["user_id"]).text(" pong!").send_to_group(msg.group_id)
+        MessageManager.Message().at(msg.sender["user_id"]).text(" pong!").send_to_group(msg.group_id)
