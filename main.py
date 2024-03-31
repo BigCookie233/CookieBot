@@ -46,11 +46,11 @@ if __name__ == '__main__':
     # Initialize Thread Pool
     logger.info("Initializing Thread Pool")
     ThreadPool.init()
-
+    # Get Profile
     bot_info = BotController.send_get_request("get_login_info")
     if bot_info is None:
         logger.error("获取BotUID与昵称失败！")
-    bot_uid, bot_name = bot_info["user_id"], bot_info["nickname"]
+    Configs.bot_profile = (bot_info["user_id"], bot_info["nickname"])
     # 禁用werkzeug的日志记录
     logging.getLogger('werkzeug').disabled = True
     # Start Server

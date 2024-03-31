@@ -13,5 +13,5 @@ logger = LoggerManager.logger
 @Events.on_group_message
 def on_message(event: Events.ReceiveGroupMessageEvent):
     msg = event.message
-    if msg.segment_chain[0] == "ping!":
+    if msg.startswith_atme() and msg.segment_chain[1] == " ping!":
         MessageManager.Message().at(msg.sender["user_id"]).text(" pong!").send_to_group(msg.group_id)

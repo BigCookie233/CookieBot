@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import CookieLibraries.Events as Events
+import CookieLibraries.Configs as Configs
 
 
 # Message Segment Classes
@@ -81,7 +82,7 @@ class ReplySegment(MessageSegment):
 
     @property
     def data(self):
-        return {"id": self.msg_id}
+        return {"id": str(self.msg_id)}
 
 
 # Message Classes
@@ -109,9 +110,13 @@ class Message:
 
     def reply(self, msg_id):
         self.segment_chain.append(ReplySegment(msg_id))
+        return self
 
     def send_to_group(self, group_id):
         Events.SendGroupMessageEvent(self.raw_message, group_id).call()
+
+    def startswith_atme(self):
+        return isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(Configs.bot_profile[0])
 
     def extend(self, other):
         if isinstance(other, MessageSegment):
