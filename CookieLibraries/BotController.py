@@ -34,6 +34,6 @@ def send_get_request(node: str):
         return response.json()["data"]
 
 
-@EventManager.event_listener(Events.ActionEvent, EventManager.Priority.LOWEST)
-def group_message_sender(event: Events.ActionEvent):
+@EventManager.event_listener(Events.SendActionEvent, EventManager.Priority.LOWEST)
+def group_message_sender(event: Events.SendActionEvent):
     send_post_request(event.action, event.data)

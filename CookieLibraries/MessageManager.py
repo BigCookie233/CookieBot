@@ -2,8 +2,8 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.Events as Events
 import CookieLibraries.Configs as Configs
+import CookieLibraries.Events as Events
 
 
 # Message Segment Classes
@@ -113,7 +113,7 @@ class Message:
         return self
 
     def send_to_group(self, group_id):
-        Events.SendGroupMessageEvent(self.raw_message, group_id).call()
+        Events.SendGroupMessageEventSend(self.raw_message, group_id).call()
 
     def startswith_atme(self):
         return isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(Configs.bot_profile[0])
@@ -137,23 +137,23 @@ class Message:
         return self.extend(other)
 
 
-parser_map = {
-    "text": lambda data: TextSegment(data["text"]),
-    "face": lambda data: FaceSegment(data["id"]),
-    "image": lambda data: ImageSegment(data["file"]),
-    "at": lambda data: AtSegment(data["qq"]),
-    "reply": lambda data: ReplySegment(data["id"])
-}
-
-
 class ReceivedMessage(Message):
     def __init__(self, raw_msg, msg_id, sender):
         chain = []
         for seg in raw_msg:
             msg_type = seg["type"]
             data = seg["data"]
-            if msg_type in parser_map.keys():
-                chain.append(parser_map[msg_type](data))
+            match msg_type:
+                case "text":
+                    chain.append(TextSegment(data["text"]))
+                case "face":
+                    chain.append(FaceSegment(data["id"]))
+                case "image":
+                    chain.append(ImageSegment(data["file"]))
+                case "at":
+                    chain.append(AtSegment(data["qq"]))
+                case "reply":
+                    chain.append(ReplySegment(data["id"]))
         super().__init__(chain)
         self.message_id = msg_id
         self.sender = sender

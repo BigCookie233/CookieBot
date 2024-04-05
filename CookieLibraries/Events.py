@@ -17,7 +17,7 @@ class ReceiveGroupMessageEvent(ReceiveMessageEvent):
         super().__init__(message)
 
 
-class ActionEvent(EventManager.CancellableEvent):
+class SendActionEvent(EventManager.CancellableEvent):
     def __init__(self, action):
         super().__init__()
         self.action = action
@@ -27,7 +27,7 @@ class ActionEvent(EventManager.CancellableEvent):
         return {}
 
 
-class SendGroupMessageEvent(ActionEvent):
+class SendGroupMessageEventSend(SendActionEvent):
     def __init__(self, message, group_id):
         super().__init__("send_group_msg")
         self.message = message
@@ -55,4 +55,4 @@ def on_group_message(func):
 
 
 def on_group_message_send(func):
-    return EventManager.event_listener(SendGroupMessageEvent)(func)
+    return EventManager.event_listener(SendGroupMessageEventSend)(func)
