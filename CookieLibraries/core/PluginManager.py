@@ -5,8 +5,8 @@
 import importlib
 import os
 
-import CookieLibraries.EventManager as EventManager
-import CookieLibraries.LoggerManager as LoggerManager
+import CookieLibraries.core.EventManager as EventManager
+import CookieLibraries.core.LoggerManager as LoggerManager
 
 
 class PluginEvent(EventManager.Event):

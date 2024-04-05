@@ -7,7 +7,7 @@ import warnings
 from enum import Enum
 from typing import Callable
 
-import CookieLibraries.LoggerManager as LoggerManager
+import CookieLibraries.core.LoggerManager as LoggerManager
 
 event_listeners = {}
 

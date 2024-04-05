@@ -2,8 +2,9 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.Configs as Configs
-import CookieLibraries.Events as Events
+import CookieLibraries.extra.Configs as Configs
+from CookieLibraries.core import EventManager as EventManager
+from CookieLibraries.core.BotController import SendActionEvent
 
 
 # Message Segment Classes
@@ -113,10 +114,11 @@ class Message:
         return self
 
     def send_to_group(self, group_id):
-        Events.SendGroupMessageEventSend(self.raw_message, group_id).call()
+        SendGroupMessageEvent(self.raw_message, group_id).call()
 
     def startswith_atme(self):
-        return isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(Configs.bot_profile[0])
+        return self.segment_chain and isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(
+            Configs.bot_profile[0])
 
     def extend(self, other):
         if isinstance(other, MessageSegment):
@@ -163,3 +165,25 @@ class ReceivedGroupMessage(ReceivedMessage):
     def __init__(self, raw_msg, msg_id, sender, group_id):
         super().__init__(raw_msg, msg_id, sender)
         self.group_id = group_id
+
+
+class ReceiveMessageEvent(EventManager.Event):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
+
+
+class ReceiveGroupMessageEvent(ReceiveMessageEvent):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class SendGroupMessageEvent(SendActionEvent):
+    def __init__(self, message, group_id):
+        super().__init__("send_group_msg")
+        self.message = message
+        self.group_id = group_id
+
+    @property
+    def data(self) -> dict:
+        return {"group_id": self.group_id, "message": self.message}

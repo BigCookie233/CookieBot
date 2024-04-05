@@ -5,18 +5,16 @@
 import requests
 import importlib
 
-import CookieLibraries.Configs as Configs
-import CookieLibraries.EventManager as EventManager
-import CookieLibraries.Events as Events
-import CookieLibraries.LoggerManager as LoggerManager
-import CookieLibraries.ThreadPool as ThreadPool
+import CookieLibraries.core.LoggerManager as LoggerManager
+import CookieLibraries.core.ThreadPool as ThreadPool
+from CookieLibraries.core import EventManager as EventManager
 
 base_url = None
 
 
 def init():
     global base_url
-    config = importlib.import_module(name="CookieLibraries.Configs").GlobalConfig()
+    config = importlib.import_module(name="CookieLibraries.core.ConfigManager").GlobalConfig()
     base_url = "http://{}:{}/".format(config.api_host, config.api_port)
 
 
@@ -34,6 +32,16 @@ def send_get_request(node: str):
         return response.json()["data"]
 
 
-@EventManager.event_listener(Events.SendActionEvent, EventManager.Priority.LOWEST)
-def group_message_sender(event: Events.SendActionEvent):
+class SendActionEvent(EventManager.CancellableEvent):
+    def __init__(self, action):
+        super().__init__()
+        self.action = action
+
+    @property
+    def data(self) -> dict:
+        return {}
+
+
+@EventManager.event_listener(SendActionEvent, EventManager.Priority.LOWEST)
+def group_message_sender(event: SendActionEvent):
     send_post_request(event.action, event.data)

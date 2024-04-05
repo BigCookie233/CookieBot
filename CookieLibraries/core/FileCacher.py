@@ -4,7 +4,7 @@
 
 import os
 
-import CookieLibraries.ThreadPool as ThreadPool
+import CookieLibraries.core.ThreadPool as ThreadPool
 
 cache = {}
 

@@ -2,25 +2,17 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.BotController
-import CookieLibraries.ConfigManager
-import CookieLibraries.Configs
-import CookieLibraries.EventManager
-import CookieLibraries.Events
-import CookieLibraries.ExceptionHandler
-import CookieLibraries.LoggerManager
-import CookieLibraries.MessageManager
-import CookieLibraries.PluginManager
-import CookieLibraries.ThreadPool
+import CookieLibraries.extra
+import CookieLibraries.core
 
 
 def init():
     # Initialize Logger
     print("Initializing Logger")
-    LoggerManager.init("logs")
+    CookieLibraries.core.LoggerManager.init("logs")
     # Initialize Controller
-    LoggerManager.logger.info("Initializing Controller")
-    BotController.init()
+    CookieLibraries.core.LoggerManager.logger.info("Initializing Controller")
+    CookieLibraries.core.BotController.init()
     # Initialize Thread Pool
-    LoggerManager.logger.info("Initializing Thread Pool")
-    ThreadPool.init()
+    CookieLibraries.core.LoggerManager.logger.info("Initializing Thread Pool")
+    CookieLibraries.core.ThreadPool.init()

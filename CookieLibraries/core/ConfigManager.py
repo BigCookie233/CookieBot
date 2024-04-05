@@ -7,8 +7,8 @@ import traceback
 
 import yaml
 
-import CookieLibraries.LoggerManager as LoggerManager
-import CookieLibraries.FileCacher as FileCacher
+import CookieLibraries.core.FileCacher as FileCacher
+import CookieLibraries.core.LoggerManager as LoggerManager
 
 
 class Config:
@@ -29,6 +29,17 @@ class Config:
         else:
             raise TypeError("default config must be a string")
         return self
+
+
+class GlobalConfig(Config):
+    def __init__(self):
+        super().__init__("config.yml")
+        self.reload()
+        self.server_host = self.raw_config["server"]["host"]
+        self.server_port = self.raw_config["server"]["port"]
+        self.api_host = self.raw_config["api"]["host"]
+        self.api_port = self.raw_config["api"]["port"]
+        self.max_workers = self.raw_config["thread_pool"]["max_workers"]
 
 
 class PluginConfig(Config):

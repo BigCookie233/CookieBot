@@ -4,7 +4,8 @@ import logging
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-from CookieLibraries import *
+from CookieLibraries.core import *
+from CookieLibraries.extra import *
 
 VERSION = "2.1.0-dev"
 app = Flask("CookieBot")
@@ -21,30 +22,24 @@ def post_data():
         logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
             message.group_id, message.sender["nickname"], message.sender['user_id'], data['raw_message'],
             message.message_id))
-        Events.ReceiveGroupMessageEvent(message).call()
+        CookieLibraries.core.MessageManager.ReceiveGroupMessageEvent(message).call()
 
     return "OK"
 
 
 # 主函数
 if __name__ == '__main__':
-    # Initialize Logger
-    print("Initializing Logger")
-    LoggerManager.init("logs")
+    # Initialize
+    CookieLibraries.init()
     # Start up
     logger = LoggerManager.logger
     logger.info("Starting up CookieBot {}".format(VERSION))
     # Load Config
-    config = Configs.GlobalConfig()
+    config = ConfigManager.GlobalConfig()
     # Load Plugins
     logger.info("Loading plugins...")
     PluginManager.load_plugins("plugins")
     logger.info("Loaded {} plugins".format(len(PluginManager.plugins)))
-    # Initialize Controller
-    BotController.init()
-    # Initialize Thread Pool
-    logger.info("Initializing Thread Pool")
-    ThreadPool.init()
     # Get Profile
     bot_info = BotController.send_get_request("get_login_info")
     if bot_info is None:
@@ -60,6 +55,4 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error("Cannot start server: {}".format(e))
     finally:
-        logger.info("Closing Thread Pool")
-        ThreadPool.thread_pool.shutdown()
-        logger.info("Goodbye!")
+        logger.info("Stopping server")

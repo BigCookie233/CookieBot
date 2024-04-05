@@ -10,7 +10,7 @@ import traceback
 import coloredlogs
 import sys
 
-import CookieLibraries.ExceptionHandler as ExceptionHandler
+import CookieLibraries.core.ExceptionHandler as ExceptionHandler
 
 logger = None
 
