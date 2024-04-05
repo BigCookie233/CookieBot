@@ -60,7 +60,7 @@ def init(logs_path):
 def log_exception(block=False):
     def exception_logger(e):
         if isinstance(logger, logging.Logger):
-            logger.error("An error occurred: {}".format(e))
+            logger.error(f"An error occurred: {e}")
 
     return ExceptionHandler.exception_dispatcher(exception_logger, block)
 

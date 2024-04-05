@@ -15,7 +15,7 @@ base_url = None
 def init():
     global base_url
     config = importlib.import_module(name="CookieLibraries.core.ConfigManager").GlobalConfig()
-    base_url = "http://{}:{}/".format(config.api_host, config.api_port)
+    base_url = f"http://{config.api_host}:{config.api_port}/"
 
 
 @ThreadPool.async_task

@@ -55,11 +55,11 @@ class Plugin:
         self.version = None
 
     def enable(self):
-        LoggerManager.logger.info("Enabling {} {}".format(self.name, self.version))
+        LoggerManager.logger.info(f"Enabling {self.name} v{self.version}")
         PluginEnableEvent(self.instance).call()
 
     def disable(self):
-        LoggerManager.logger.info("Disabling {} {}".format(self.name, self.version))
+        LoggerManager.logger.info(f"Disabling {self.name} v{self.version}")
         PluginDisableEvent(self.instance).call()
 
 

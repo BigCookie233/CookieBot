@@ -5,7 +5,7 @@ from CookieLibraries.core import *
 from CookieLibraries.extra import *
 
 PLUGIN_NAME = "PingPong"
-PLUGIN_VERSION = "v1.0 SNAPSHOT"
+PLUGIN_VERSION = "1.0 SNAPSHOT"
 
 logger = LoggerManager.logger
 
