@@ -15,17 +15,16 @@ class Config:
     def __init__(self, path):
         self.raw_config = None
         self.path = path
-        self.encoding = "utf-8"
 
     @LoggerManager.log_exception()
     def reload(self):
-        self.raw_config = yaml.load(FileCacher.read_file(self.path, self.encoding), yaml.FullLoader)
+        self.raw_config = yaml.load(FileCacher.read_file(self.path), yaml.FullLoader)
         return self
 
     @LoggerManager.log_exception()
     def save_default(self, default_config: str):
         if isinstance(default_config, str):
-            FileCacher.write_non_existent_file(self.path, default_config, self.encoding)
+            FileCacher.write_non_existent_file(self.path, default_config)
         else:
             raise TypeError("default config must be a string")
         return self

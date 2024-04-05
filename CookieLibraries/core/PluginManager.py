@@ -50,6 +50,7 @@ class Plugin:
             LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
 
     def unload(self):
+        EventManager.unregister_module(self.instance.__name__)
         self.instance = None
         self.name = None
         self.version = None

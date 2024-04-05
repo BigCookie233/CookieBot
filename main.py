@@ -33,13 +33,13 @@ if __name__ == '__main__':
     CookieLibraries.init()
     # Start up
     logger = LoggerManager.logger
-    logger.info("Starting up CookieBot {}".format(VERSION))
+    logger.info(f"Starting up CookieBot {VERSION}")
     # Load Config
     config = ConfigManager.GlobalConfig()
     # Load Plugins
     logger.info("Loading plugins...")
     PluginManager.load_plugins("plugins")
-    logger.info("Loaded {} plugins".format(len(PluginManager.plugins)))
+    logger.info(f"Loaded {len(PluginManager.plugins)} plugins")
     # Get Profile
     bot_info = BotController.send_get_request("get_login_info")
     if bot_info is None:
@@ -49,10 +49,10 @@ if __name__ == '__main__':
     logging.getLogger('werkzeug').disabled = True
     # Start Server
     try:
-        logger.info("Starting server on {}:{}".format(config.server_host, config.server_port))
+        logger.info(f"Starting server on {config.server_host}:{config.server_port}")
         server = make_server(config.server_host, config.server_port, app)
         server.serve_forever()
     except Exception as e:
-        logger.error("Cannot start server: {}".format(e))
+        logger.error(f"Cannot start server: {e}")
     finally:
         logger.info("Stopping server")
