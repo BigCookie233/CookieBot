@@ -8,7 +8,7 @@ import traceback
 import yaml
 
 import CookieLibraries.core.FileCacher as FileCacher
-import CookieLibraries.core.LoggerManager as LoggerManager
+from CookieLibraries.core import LoggerUtils
 
 
 class Config:
@@ -16,12 +16,12 @@ class Config:
         self.raw_config = None
         self.path = path
 
-    @LoggerManager.log_exception()
+    @LoggerUtils.log_exception()
     def reload(self):
         self.raw_config = yaml.load(FileCacher.read_file(self.path), yaml.FullLoader)
         return self
 
-    @LoggerManager.log_exception()
+    @LoggerUtils.log_exception()
     def save_default(self, default_config: str):
         if isinstance(default_config, str):
             FileCacher.write_non_existent_file(self.path, default_config)

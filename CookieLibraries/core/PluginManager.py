@@ -5,21 +5,19 @@
 import importlib
 import os
 
-import CookieLibraries.core.EventManager as EventManager
-import CookieLibraries.core.LoggerManager as LoggerManager
+from CookieLibraries.core import EventManager
+from CookieLibraries.core import LoggerUtils
 
 
 class PluginEvent(EventManager.Event):
     def __init__(self, instance):
         self.instance = instance
 
-    def call(self):
-        if self.instance.__name__ in EventManager.event_listeners:
-            module = EventManager.event_listeners[self.instance.__name__]
-            if self.__class__ in module:
-                for priority in sorted(module[self.__class__].keys(), key=lambda x: x.value):
-                    for listener in module[self.__class__][priority]:
-                        LoggerManager.log_exception(True)(listener)(self)
+    @property
+    def listeners(self):
+        for listener in super().listeners:
+            if listener.listener.__module__ == self.instance.__name__:
+                yield listener
 
 
 class PluginEnableEvent(PluginEvent):
@@ -47,7 +45,7 @@ class Plugin:
             self.version = self.instance.PLUGIN_VERSION
         except Exception as e:
             self.unload()
-            LoggerManager.logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
+            LoggerUtils.logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
 
     def unload(self):
         EventManager.unregister_module(self.instance.__name__)
@@ -56,11 +54,11 @@ class Plugin:
         self.version = None
 
     def enable(self):
-        LoggerManager.logger.info(f"Enabling {self.name} v{self.version}")
+        LoggerUtils.logger.info(f"Enabling {self.name} v{self.version}")
         PluginEnableEvent(self.instance).call()
 
     def disable(self):
-        LoggerManager.logger.info(f"Disabling {self.name} v{self.version}")
+        LoggerUtils.logger.info(f"Disabling {self.name} v{self.version}")
         PluginDisableEvent(self.instance).call()
 
 
@@ -83,5 +81,5 @@ def load_plugins(package):
                 if plugin_name.endswith(suffix):
                     load_plugin("." + plugin_name.split(".")[0], package)
     except Exception as e:
-        LoggerManager.logger.error("An error occurred while loading plugins: {}".format(e))
+        LoggerUtils.logger.error("An error occurred while loading plugins: {}".format(e))
         raise

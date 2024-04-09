@@ -9,10 +9,10 @@ import CookieLibraries.core
 def init():
     # Initialize Logger
     print("Initializing Logger")
-    CookieLibraries.core.LoggerManager.init("logs")
+    CookieLibraries.core.LoggerUtils.init("logs")
     # Initialize Controller
-    CookieLibraries.core.LoggerManager.logger.info("Initializing Controller")
+    CookieLibraries.core.LoggerUtils.logger.info("Initializing Controller")
     CookieLibraries.core.BotController.init()
     # Initialize Thread Pool
-    CookieLibraries.core.LoggerManager.logger.info("Initializing Thread Pool")
+    CookieLibraries.core.LoggerUtils.logger.info("Initializing Thread Pool")
     CookieLibraries.core.ThreadPool.init()

@@ -7,9 +7,9 @@ import warnings
 from enum import Enum
 from typing import Callable
 
-import CookieLibraries.core.LoggerManager as LoggerManager
+from CookieLibraries.core import LoggerUtils
 
-event_listeners = {}
+_event_listeners = {}
 
 
 class Priority(Enum):
@@ -25,15 +25,19 @@ class Event:
     Event base class
     """
 
+    @property
+    def listeners(self):
+        for event_class, listeners in _event_listeners.items():
+            if issubclass(self.__class__, event_class):
+                for listener in listeners:
+                    yield listener
+
     def call(self):
         """
         Call event
         """
-        for module in event_listeners.values():
-            for clazz, listeners in module.items():
-                if issubclass(self.__class__, clazz):
-                    for listener in listeners:
-                        LoggerManager.traceback_exception(True)(listener)(self)
+        for listener in self.listeners:
+            LoggerUtils.traceback_exception(True)(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -54,13 +58,10 @@ class CancellableEvent(Event):
         """
         Call event
         """
-        for module in event_listeners.values():
-            for clazz, listeners in module.items():
-                if issubclass(self.__class__, clazz):
-                    for listener in listeners:
-                        LoggerManager.traceback_exception(True)(listener)(self)
-                        if self.isCancelled:
-                            return None
+        for listener in self.listeners:
+            LoggerUtils.traceback_exception(True)(listener)(self)
+            if self.isCancelled:
+                return None
 
 
 class EventListener:
@@ -70,22 +71,47 @@ class EventListener:
         assert params_len == 1, f"the listener takes {params_len} positional arguments but 1 and only 1 will be given"
         assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
         assert isinstance(priority, Priority), "the priority must be a priority"
-        self.listener = listener
-        self.event_class = event_class
-        self.priority = priority
+        self.__listener = listener
+        self.__event_class = event_class
+        self.__priority = priority
+        _event_listeners.setdefault(self.__event_class, []).append(self)
+        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
+
+    @property
+    def listener(self):
+        return self.__listener
+
+    @property
+    def priority(self) -> Priority:
+        return self.__priority
+
+    @property
+    def event_class(self) -> type:
+        return self.__event_class
+
+    @priority.setter
+    def priority(self, priority: Priority):
+        assert isinstance(priority, Priority), "the priority must be a priority"
+        self.__priority = priority
+        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
+
+    @event_class.setter
+    def event_class(self, event_class: type):
+        assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
+        _event_listeners[self.__event_class].remove(self)
+        self.__event_class = event_class
+        _event_listeners.setdefault(self.__event_class, []).append(self)
+        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
 
     def __call__(self, event: Event):
-        self.listener(event)
+        assert isinstance(event, self.__event_class), "invalid event for this listener"
+        self.__listener(event)
 
     def unregister(self):
         """
         Unregister the event listener
         """
-        for module in event_listeners.values():
-            for clazz, listeners in module.items():
-                if self in listeners:
-                    listeners.remove(self)
-                    listeners.sort(key=lambda obj: obj.priority.value)
+        _event_listeners[self.__event_class].remove(self)
 
 
 def event_listener(event_class: type, priority: Priority = Priority.NORMAL) -> Callable:
@@ -99,9 +125,8 @@ def event_listener(event_class: type, priority: Priority = Priority.NORMAL) -> C
 
     def registry(func) -> EventListener:
         listener = EventListener(func, event_class, priority)
-        (event_listeners.setdefault(func.__module__, dict())
-         .setdefault(event_class, []).append(listener))
-        event_listeners[func.__module__][event_class].sort(key=lambda obj: obj.priority.value)
+        _event_listeners.setdefault(event_class, []).append(listener)
+        _event_listeners[event_class].sort(key=lambda obj: obj.priority.value)
         return listener
 
     return registry
@@ -120,10 +145,4 @@ def unregister_listener(listener: Callable):
 
 
 def unregister_module(module):
-    """
-    Unregister all listeners of a module
-
-    Args:
-        module: the module
-    """
-    event_listeners.pop(module)
+    warnings.warn("The unregister_module() is deprecated", DeprecationWarning)

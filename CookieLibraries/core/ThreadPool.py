@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import atexit
 
-from CookieLibraries.core.LoggerManager import logger
+from CookieLibraries.core.LoggerUtils import logger
 
 thread_pool = None
 

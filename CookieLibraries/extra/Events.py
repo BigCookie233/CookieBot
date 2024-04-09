@@ -4,7 +4,7 @@
 
 import CookieLibraries.core.EventManager as EventManager
 import CookieLibraries.core.PluginManager as PluginManager
-from CookieLibraries.core.MessageManager import ReceiveMessageEvent, ReceiveGroupMessageEvent, SendGroupMessageEvent
+from CookieLibraries.core.MessageUtils import ReceiveMessageEvent, ReceiveGroupMessageEvent, SendGroupMessageEvent
 
 
 def on_enable(func):
@@ -19,7 +19,7 @@ def on_message(func):
     return EventManager.event_listener(ReceiveMessageEvent)(func)
 
 
-def on_group_message(func):
+def on_group_message(func) -> EventManager.EventListener:
     return EventManager.event_listener(ReceiveGroupMessageEvent)(func)
 
 

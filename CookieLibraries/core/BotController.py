@@ -2,12 +2,13 @@
 
 # Created by BigCookie233
 
-import requests
 import importlib
 
-import CookieLibraries.core.LoggerManager as LoggerManager
-import CookieLibraries.core.ThreadPool as ThreadPool
-from CookieLibraries.core import EventManager as EventManager
+import requests
+
+from CookieLibraries.core import EventManager
+from CookieLibraries.core import LoggerUtils
+from CookieLibraries.core import ThreadPool
 
 base_url = None
 
@@ -19,13 +20,14 @@ def init():
 
 
 @ThreadPool.async_task
-@LoggerManager.log_exception(True)
+@LoggerUtils.log_exception(True)
 def send_post_request(node: str, json):
     if isinstance(base_url, str):
         response = requests.post(base_url + node, json=json)
         return response.json()["data"]
 
 
+@LoggerUtils.log_exception(True)
 def send_get_request(node: str):
     if isinstance(base_url, str):
         response = requests.get(base_url + node)

@@ -17,12 +17,12 @@ def post_data():
     data = request.get_json()
 
     if data['post_type'] == "message" and data['message_type'] == 'group':  # Group Message
-        message = MessageManager.ReceivedGroupMessage(data['message'], data['message_id'], data['sender'],
-                                                      data['group_id'])
+        message = MessageUtils.ReceivedGroupMessage(data['message'], data['message_id'], data['sender'],
+                                                    data['group_id'])
         logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
             message.group_id, message.sender["nickname"], message.sender['user_id'], data['raw_message'],
             message.message_id))
-        CookieLibraries.core.MessageManager.ReceiveGroupMessageEvent(message).call()
+        CookieLibraries.core.MessageUtils.ReceiveGroupMessageEvent(message).call()
 
     return "OK"
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # Initialize
     CookieLibraries.init()
     # Start up
-    logger = LoggerManager.logger
+    logger = LoggerUtils.logger
     logger.info(f"Starting up CookieBot {VERSION}")
     # Load Config
     config = ConfigManager.GlobalConfig()
@@ -44,7 +44,8 @@ if __name__ == '__main__':
     bot_info = BotController.send_get_request("get_login_info")
     if bot_info is None:
         logger.error("获取BotUID与昵称失败！")
-    Configs.bot_profile = (bot_info["user_id"], bot_info["nickname"])
+    else:
+        Configs.bot_profile = (bot_info["user_id"], bot_info["nickname"])
     # 禁用werkzeug的日志记录
     logging.getLogger('werkzeug').disabled = True
     # Start Server
