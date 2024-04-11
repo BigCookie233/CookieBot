@@ -16,7 +16,7 @@ class PluginEvent(EventManager.Event):
     @property
     def listeners(self):
         for listener in super().listeners:
-            if listener.listener.__module__ == self.instance.__name__:
+            if listener.func.__module__ == self.instance.__name__:
                 yield listener
 
 

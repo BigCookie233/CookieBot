@@ -65,21 +65,37 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self, listener: Callable, event_class: type, priority: Priority):
-        assert callable(listener), "the listener must be a callable object"
-        params_len = len(inspect.signature(listener).parameters)
+    def __init__(self, func: Callable, event_class: type, priority: Priority):
+        assert callable(func), "the listener must be a callable object"
+        params_len = len(inspect.signature(func).parameters)
         assert params_len == 1, f"the listener takes {params_len} positional arguments but 1 and only 1 will be given"
         assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
         assert isinstance(priority, Priority), "the priority must be a priority"
-        self.__listener = listener
+        self.__func = func
         self.__event_class = event_class
         self.__priority = priority
         _event_listeners.setdefault(self.__event_class, []).append(self)
         _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
 
+    def __call__(self, event: Event):
+        assert isinstance(event, self.__event_class), "invalid event for this listener"
+        self.__func(event)
+
+    def register(self):
+        _event_listeners.setdefault(self.__event_class, []).append(self)
+        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
+
+    def unregister(self):
+        """
+        Unregister the event listener
+        """
+        _event_listeners[self.__event_class].remove(self)
+        if not _event_listeners[self.__event_class]:
+            _event_listeners.pop(self.__event_class)
+
     @property
-    def listener(self):
-        return self.__listener
+    def func(self):
+        return self.__func
 
     @property
     def priority(self) -> Priority:
@@ -98,20 +114,9 @@ class EventListener:
     @event_class.setter
     def event_class(self, event_class: type):
         assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
-        _event_listeners[self.__event_class].remove(self)
+        self.unregister()
         self.__event_class = event_class
-        _event_listeners.setdefault(self.__event_class, []).append(self)
-        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
-
-    def __call__(self, event: Event):
-        assert isinstance(event, self.__event_class), "invalid event for this listener"
-        self.__listener(event)
-
-    def unregister(self):
-        """
-        Unregister the event listener
-        """
-        _event_listeners[self.__event_class].remove(self)
+        self.register()
 
 
 def event_listener(event_class: type, priority: Priority = Priority.NORMAL) -> Callable:
@@ -124,10 +129,7 @@ def event_listener(event_class: type, priority: Priority = Priority.NORMAL) -> C
     """
 
     def registry(func) -> EventListener:
-        listener = EventListener(func, event_class, priority)
-        _event_listeners.setdefault(event_class, []).append(listener)
-        _event_listeners[event_class].sort(key=lambda obj: obj.priority.value)
-        return listener
+        return EventListener(func, event_class, priority)
 
     return registry
 
