@@ -5,7 +5,7 @@
 import CookieLibraries.core.BotController
 import CookieLibraries.core.ConfigManager
 import CookieLibraries.core.EventManager
-import CookieLibraries.core.ExceptionHandler
+import CookieLibraries.core.ExceptionHandlers
 import CookieLibraries.core.LoggerUtils
 import CookieLibraries.core.MessageUtils
 import CookieLibraries.core.PluginManager

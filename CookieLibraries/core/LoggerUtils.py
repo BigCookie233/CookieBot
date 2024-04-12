@@ -10,7 +10,7 @@ import traceback
 import coloredlogs
 import sys
 
-import CookieLibraries.core.ExceptionHandler as ExceptionHandler
+from CookieLibraries.core import ExceptionHandlers
 
 logger = None
 
@@ -61,13 +61,17 @@ def log_exception(block=False):
     def exception_logger(e):
         if isinstance(logger, logging.Logger):
             logger.error(f"An error occurred: {e}")
+        if not block:
+            raise
 
-    return ExceptionHandler.exception_dispatcher(exception_logger, block)
+    return ExceptionHandlers.exception_handler(exception_logger)
 
 
 def traceback_exception(block=False):
     def exception_logger(e):
         if isinstance(logger, logging.Logger):
             logger.error(traceback.format_exc())
+        if not block:
+            raise
 
-    return ExceptionHandler.exception_dispatcher(exception_logger, block)
+    return ExceptionHandlers.exception_handler(exception_logger)
