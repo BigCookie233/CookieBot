@@ -44,6 +44,6 @@ class SendActionEvent(EventManager.CancellableEvent):
         return {}
 
 
-@EventManager.event_listener(SendActionEvent, EventManager.Priority.LOWEST)
+@EventManager.event_listener(priority=EventManager.Priority.LOWEST)
 def group_message_sender(event: SendActionEvent):
     send_post_request(event.action, event.data)
