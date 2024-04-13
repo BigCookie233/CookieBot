@@ -37,7 +37,7 @@ class Event:
         Call event
         """
         for listener in self.listeners:
-            LoggerUtils.traceback_exception(True)(listener)(self)
+            LoggerUtils.traceback_exception(listener)(self)
 
 
 class CancellableEvent(Event):
@@ -133,6 +133,6 @@ def unregister_listener(listener: Callable):
     Args:
         listener: the listener
     """
-    warnings.warn("The unregister_listener() is deprecated", DeprecationWarning)
+    warnings.warn("the unregister_listener() is deprecated", DeprecationWarning)
     assert isinstance(listener, EventListener), "the listener must be a registered listener"
     listener.unregister()

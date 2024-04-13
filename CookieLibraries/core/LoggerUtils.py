@@ -6,6 +6,7 @@ import logging
 import logging.handlers as handlers
 import os
 import traceback
+import warnings
 
 import coloredlogs
 import sys
@@ -58,6 +59,8 @@ def init(logs_path):
 
 
 def log_exception(block=False):
+    warnings.warn("the log_exception() is deprecated", DeprecationWarning)
+
     def exception_logger(e):
         if isinstance(logger, logging.Logger):
             logger.error(f"An error occurred: {e}")
@@ -67,11 +70,9 @@ def log_exception(block=False):
     return ExceptionHandlers.exception_handler(exception_logger)
 
 
-def traceback_exception(block=False):
-    def exception_logger(e):
+def traceback_exception(func):
+    def exception_logger():
         if isinstance(logger, logging.Logger):
             logger.error(traceback.format_exc())
-        if not block:
-            raise
 
-    return ExceptionHandlers.exception_handler(exception_logger)
+    return ExceptionHandlers.exception_handler(exception_logger)(func)
