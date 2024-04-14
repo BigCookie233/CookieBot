@@ -4,7 +4,7 @@
 
 import CookieLibraries.extra.Configs as Configs
 from CookieLibraries.core import EventManager as EventManager
-from CookieLibraries.core.BotController import SendActionEvent
+from CookieLibraries.protocol.BotController import SendActionEvent
 
 
 # Message Segment Classes
@@ -20,7 +20,7 @@ class MessageSegment:
 
     @property
     def data(self) -> dict:
-        return {}
+        raise NotImplementedError
 
     @property
     def raw_segment(self) -> dict:
@@ -83,6 +83,16 @@ class ReplySegment(MessageSegment):
 
     @property
     def data(self):
+        return {"id": str(self.msg_id)}
+
+
+class LongMsgSegment(MessageSegment):
+    def __init__(self, msg_id):
+        self.msg_id = msg_id
+        super().__init__("longmsg")
+
+    @property
+    def data(self) -> dict:
         return {"id": str(self.msg_id)}
 
 
