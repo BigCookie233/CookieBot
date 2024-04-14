@@ -1,31 +1,9 @@
 # coding:utf-8
-import logging
-
-from flask import Flask, request
-from werkzeug.serving import make_server
-
 from CookieLibraries.core import *
 from CookieLibraries.extra import *
+from CookieLibraries.protocol import *
 
-VERSION = "2.1.0-dev"
-app = Flask("CookieBot")
-
-
-# 上报
-@app.route('/', methods=["POST"])
-def post_data():
-    data = request.get_json()
-
-    if data['post_type'] == "message" and data['message_type'] == 'group':  # Group Message
-        message = MessageUtils.ReceivedGroupMessage(data['message'], data['message_id'], data['sender'],
-                                                    data['group_id'])
-        logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
-            message.group_id, message.sender["nickname"], message.sender['user_id'], data['raw_message'],
-            message.message_id))
-        CookieLibraries.core.MessageUtils.ReceiveGroupMessageEvent(message).call()
-
-    return "OK"
-
+VERSION = "2.2.0-dev"
 
 # 主函数
 if __name__ == '__main__':
@@ -46,14 +24,5 @@ if __name__ == '__main__':
         logger.error("获取BotUID与昵称失败！")
     else:
         Configs.bot_profile = (bot_info["user_id"], bot_info["nickname"])
-    # 禁用werkzeug的日志记录
-    logging.getLogger('werkzeug').disabled = True
     # Start Server
-    try:
-        logger.info(f"Starting server on {config.server_host}:{config.server_port}")
-        server = make_server(config.server_host, config.server_port, app)
-        server.serve_forever()
-    except Exception as e:
-        logger.error(f"Cannot start server: {e}")
-    finally:
-        logger.info("Stopping server")
+    Server.start()

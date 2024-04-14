@@ -44,6 +44,19 @@ class SendActionEvent(EventManager.CancellableEvent):
         raise NotImplementedError
 
 
+class Sender:
+    def __init__(self, data: dict):
+        self.user_id = data.get("user_id")
+        self.nickname = data.get("nickname")
+        self.sex = data.get("sex")
+        self.age = data.get("age")
+        self.card = data.get("card")
+        self.area = data.get("area")
+        self.level = data.get("level")
+        self.role = data.get("role")
+        self.title = data.get("title")
+
+
 @EventManager.event_listener(priority=EventManager.Priority.LOWEST)
 def group_message_sender(event: SendActionEvent):
     send_post_request(event.action, event.data)
