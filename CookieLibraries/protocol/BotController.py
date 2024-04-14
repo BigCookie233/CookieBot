@@ -37,6 +37,19 @@ def get_login_info():
     return send_get_request("get_login_info")
 
 
+class Sender:
+    def __init__(self, data: dict):
+        self.user_id = data.get("user_id")
+        self.nickname = data.get("nickname")
+        self.sex = data.get("sex")
+        self.age = data.get("age")
+        self.card = data.get("card")
+        self.area = data.get("area")
+        self.level = data.get("level")
+        self.role = data.get("role")
+        self.title = data.get("title")
+
+
 class SendActionEvent(EventManager.CancellableEvent):
     def __init__(self, action):
         super().__init__()
@@ -51,14 +64,12 @@ class SendActionEvent(EventManager.CancellableEvent):
         raise NotImplementedError
 
 
-class Sender:
-    def __init__(self, data: dict):
-        self.user_id = data.get("user_id")
-        self.nickname = data.get("nickname")
-        self.sex = data.get("sex")
-        self.age = data.get("age")
-        self.card = data.get("card")
-        self.area = data.get("area")
-        self.level = data.get("level")
-        self.role = data.get("role")
-        self.title = data.get("title")
+class SendGroupMessageEvent(SendActionEvent):
+    def __init__(self, message, group_id):
+        super().__init__("send_group_msg")
+        self.message = message
+        self.group_id = group_id
+
+    @property
+    def data(self) -> dict:
+        return {"group_id": self.group_id, "message": self.message}

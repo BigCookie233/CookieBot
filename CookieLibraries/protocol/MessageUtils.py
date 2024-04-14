@@ -95,7 +95,7 @@ class Message:
             BotController.get_login_info()["user_id"])
 
     def send_to_group(self, group_id):
-        SendGroupMessageEvent(self.raw_message, group_id).call()
+        BotController.SendGroupMessageEvent(self.raw_message, group_id).call()
 
     @property
     def raw_message(self):
@@ -143,7 +143,7 @@ class MessageBuilder(Message):
         return self.extend(other)
 
 
-class ReceivedMessage(MessageBuilder):
+class ReceiveMessageEvent(Message, EventManager.Event):
     def __init__(self, raw_msg, msg_id, sender):
         chain = []
         for seg in raw_msg:
@@ -165,29 +165,7 @@ class ReceivedMessage(MessageBuilder):
         self.sender = sender
 
 
-class ReceivedGroupMessage(ReceivedMessage):
+class ReceiveGroupMessageEvent(ReceiveMessageEvent):
     def __init__(self, raw_msg, msg_id, sender, group_id):
         super().__init__(raw_msg, msg_id, sender)
         self.group_id = group_id
-
-
-class ReceiveMessageEvent(EventManager.Event):
-    def __init__(self, message):
-        super().__init__()
-        self.message = message
-
-
-class ReceiveGroupMessageEvent(ReceiveMessageEvent):
-    def __init__(self, message):
-        super().__init__(message)
-
-
-class SendGroupMessageEvent(BotController.SendActionEvent):
-    def __init__(self, message, group_id):
-        super().__init__("send_group_msg")
-        self.message = message
-        self.group_id = group_id
-
-    @property
-    def data(self) -> dict:
-        return {"group_id": self.group_id, "message": self.message}

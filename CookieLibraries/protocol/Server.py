@@ -20,13 +20,13 @@ def post_data():
     data = request.get_json()
 
     if data['post_type'] == "message" and data['message_type'] == 'group':  # Group Message
-        message = MessageUtils.ReceivedGroupMessage(data['message'], data['message_id'],
-                                                    BotController.Sender(data["sender"]),
-                                                    data['group_id'])
+        message = MessageUtils.ReceiveGroupMessageEvent(data['message'], data['message_id'],
+                                                        BotController.Sender(data["sender"]),
+                                                        data['group_id'])
         logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
             message.group_id, message.sender.nickname, message.sender.user_id, data['raw_message'],
             message.message_id))
-        MessageUtils.ReceiveGroupMessageEvent(message).call()
+        message.call()
 
     return "OK"
 

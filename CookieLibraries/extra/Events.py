@@ -2,26 +2,23 @@
 
 # Created by BigCookie233
 
+import warnings
+
 import CookieLibraries.core.EventManager as EventManager
 import CookieLibraries.core.PluginManager as PluginManager
-from CookieLibraries.protocol.MessageUtils import ReceiveMessageEvent, ReceiveGroupMessageEvent, SendGroupMessageEvent
+from CookieLibraries.protocol.MessageUtils import ReceiveMessageEvent
 
 
 def on_enable(func):
+    warnings.warn("the on_enable() is deprecated", DeprecationWarning)
     return EventManager.event_listener(PluginManager.PluginEnableEvent)(func)
 
 
 def on_disable(func):
+    warnings.warn("the on_disable() is deprecated", DeprecationWarning)
     return EventManager.event_listener(PluginManager.PluginDisableEvent)(func)
 
 
 def on_message(func):
+    warnings.warn("the on_message() is deprecated", DeprecationWarning)
     return EventManager.event_listener(ReceiveMessageEvent)(func)
-
-
-def on_group_message(func) -> EventManager.EventListener:
-    return EventManager.event_listener(event_class=ReceiveGroupMessageEvent)(func)
-
-
-def on_group_message_send(func):
-    return EventManager.event_listener(SendGroupMessageEvent)(func)
