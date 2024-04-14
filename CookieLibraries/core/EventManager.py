@@ -63,12 +63,10 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self, func: Callable, event_class: type = None, priority: Priority = Priority.NORMAL):
+    def __init__(self, func: Callable, event_class: type, priority: Priority = Priority.NORMAL):
         assert callable(func), "the listener must be a callable object"
         params_len = len(inspect.signature(func).parameters)
         assert params_len == 1, f"the listener takes {params_len} positional arguments but 1 and only 1 will be given"
-        if event_class is None and hasattr(func, "__annotations__"):
-            event_class = next(iter(func.__annotations__.values()))
         assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
         assert isinstance(priority, Priority), "the priority must be a priority"
         self.__func = func
@@ -119,10 +117,17 @@ class EventListener:
 
 
 @Utils.allow_default
-def event_listener(func: Callable, event_class: type = None, priority: Priority = Priority.NORMAL) -> EventListener:
+def event_listener(func, event_class=None, priority=None) -> EventListener:
     """
     Register event listener
     """
+    if isinstance(event_class, Priority) and priority is None:
+        priority = event_class
+        event_class = None
+    if priority is None:
+        priority = Priority.NORMAL
+    if event_class is None and hasattr(func, "__annotations__"):
+        event_class = next(iter(func.__annotations__.values()))
     return EventListener(func, event_class, priority)
 
 
