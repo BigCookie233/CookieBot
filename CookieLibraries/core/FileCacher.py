@@ -20,7 +20,7 @@ def write_file(path, data):
         with open(path, "w") as file:
             file.write(data)
 
-    read_file.cache((path,), {}, data)
+    read_file.cache(path)(data)
     write_file_task()
 
 

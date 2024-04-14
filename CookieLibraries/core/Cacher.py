@@ -2,8 +2,8 @@
 
 # Created by BigCookie233
 
-from typing import Callable
 import pickle
+from typing import Callable
 
 
 class Cacher:
@@ -22,15 +22,20 @@ class Cacher:
             return self.mappings[params]
         self.misses += 1
         result = self.func(*args, **kwargs)
-        self.cache(args, kwargs, result)
+        self.cache(*args, **kwargs)(result)
         return result
 
-    def cache(self, args, kwargs, result):
+    def cache(self, *args, **kwargs):
         params = pickle.dumps((args, kwargs))
-        if len(self.mappings) >= self.maxsize:
-            for key in list(self.mappings.keys())[:len(self.mappings) - self.maxsize]:
-                self.mappings.pop(key)
-        self.mappings[params] = result
+
+        def cacher(result):
+            if len(self.mappings) >= self.maxsize:
+                for key in list(self.mappings.keys())[:len(self.mappings) - self.maxsize]:
+                    self.mappings.pop(key)
+            self.mappings[params] = result
+            return self
+
+        return cacher
 
     def reset(self):
         self.mappings = {}
