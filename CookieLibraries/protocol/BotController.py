@@ -6,9 +6,7 @@ import importlib
 
 import requests
 
-from CookieLibraries.core import EventManager
-from CookieLibraries.core import LoggerUtils
-from CookieLibraries.core import ThreadPool
+from CookieLibraries.core import EventManager, LoggerUtils, ThreadPool, Cacher
 
 base_url = None
 
@@ -34,10 +32,19 @@ def send_get_request(node: str):
         return response.json()["data"]
 
 
+@Cacher.cache
+def get_login_info():
+    return send_get_request("get_login_info")
+
+
 class SendActionEvent(EventManager.CancellableEvent):
     def __init__(self, action):
         super().__init__()
         self.action = action
+
+    def call(self):
+        super().call()
+        send_post_request(self.action, self.data)
 
     @property
     def data(self) -> dict:
@@ -55,8 +62,3 @@ class Sender:
         self.level = data.get("level")
         self.role = data.get("role")
         self.title = data.get("title")
-
-
-@EventManager.event_listener(priority=EventManager.Priority.LOWEST)
-def group_message_sender(event: SendActionEvent):
-    send_post_request(event.action, event.data)

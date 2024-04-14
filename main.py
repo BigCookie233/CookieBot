@@ -18,11 +18,5 @@ if __name__ == '__main__':
     logger.info("Loading plugins...")
     PluginManager.load_plugins("plugins")
     logger.info(f"Loaded {len(PluginManager.plugins)} plugins")
-    # Get Profile
-    bot_info = BotController.send_get_request("get_login_info")
-    if bot_info is None:
-        logger.error("获取BotUID与昵称失败！")
-    else:
-        Configs.bot_profile = (bot_info["user_id"], bot_info["nickname"])
     # Start Server
     Server.start()

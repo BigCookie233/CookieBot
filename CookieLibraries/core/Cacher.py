@@ -13,16 +13,16 @@ class Cacher:
         assert callable(func), "the function must be a callable object"
         self.func = func
         self.maxsize = maxsize
-        self.hits = 0
-        self.misses = 0
+        # self.hits = 0
+        # self.misses = 0
         self.mappings = {}
 
     def __call__(self, *args, **kwargs):
         params = pickle.dumps((args, kwargs))
         if params in self.mappings:
-            self.hits += 1
+            # self.hits += 1
             return self.mappings[params]
-        self.misses += 1
+        # self.misses += 1
         result = self.func(*args, **kwargs)
         self.cache(*args, **kwargs)(result)
         return result
@@ -41,8 +41,8 @@ class Cacher:
 
     def reset(self):
         self.mappings = {}
-        self.hits = 0
-        self.misses = 0
+        # self.hits = 0
+        # self.misses = 0
 
 
 @Utils.allow_default

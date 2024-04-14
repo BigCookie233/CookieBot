@@ -2,9 +2,8 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.extra.Configs as Configs
-from CookieLibraries.core import EventManager as EventManager
-from CookieLibraries.protocol.BotController import SendActionEvent
+from CookieLibraries.core import EventManager
+from CookieLibraries.protocol import BotController
 
 
 # Message Segment Classes
@@ -93,7 +92,7 @@ class Message:
 
     def startswith_atme(self):
         return self.segment_chain and isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(
-            Configs.bot_profile[0])
+            BotController.get_login_info()["user_id"])
 
     def send_to_group(self, group_id):
         SendGroupMessageEvent(self.raw_message, group_id).call()
@@ -183,7 +182,7 @@ class ReceiveGroupMessageEvent(ReceiveMessageEvent):
         super().__init__(message)
 
 
-class SendGroupMessageEvent(SendActionEvent):
+class SendGroupMessageEvent(BotController.SendActionEvent):
     def __init__(self, message, group_id):
         super().__init__("send_group_msg")
         self.message = message
