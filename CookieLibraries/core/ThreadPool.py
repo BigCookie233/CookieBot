@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import atexit
 
-from CookieLibraries.core.LoggerUtils import logger
+from CookieLibraries.core import LoggerUtils
 
 thread_pool = None
 
@@ -30,6 +30,6 @@ def async_task(func):
 @atexit.register
 def shutdown():
     if isinstance(thread_pool, ThreadPoolExecutor):
-        if isinstance(logger, logging.Logger):
-            logger.info("Closing Thread Pool")
+        if isinstance(LoggerUtils.logger, logging.Logger):
+            LoggerUtils.logger.info("Closing Thread Pool")
         thread_pool.shutdown()
