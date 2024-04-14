@@ -5,6 +5,8 @@
 import pickle
 from typing import Callable
 
+from CookieLibraries.core import Utils
+
 
 class Cacher:
     def __init__(self, func: Callable, maxsize: int):
@@ -43,8 +45,6 @@ class Cacher:
         self.misses = 0
 
 
-def cache(maxsize: int = 20) -> Callable:
-    def cacher(func) -> Cacher:
-        return Cacher(func, maxsize)
-
-    return cacher
+@Utils.allow_default
+def cache(func, maxsize=20) -> Callable:
+    return Cacher(func, maxsize)

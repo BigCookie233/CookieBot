@@ -14,20 +14,20 @@ class MessageSegment:
 
     def extend(self, other):
         if isinstance(other, MessageSegment):
-            return Message([self, other])
-        elif isinstance(other, Message):
-            return Message([self].extend(other.segment_chain))
+            return MessageBuilder([self, other])
+        elif isinstance(other, MessageBuilder):
+            return MessageBuilder([self].extend(other.segment_chain))
 
-    @property
-    def data(self) -> dict:
-        raise NotImplementedError
+    def __add__(self, other):
+        return self.extend(other)
 
     @property
     def raw_segment(self) -> dict:
         return {"type": self.msg_type, "data": self.data}
 
-    def __add__(self, other):
-        return self.extend(other)
+    @property
+    def data(self) -> dict:
+        raise NotImplementedError
 
 
 class TextSegment(MessageSegment):
@@ -86,22 +86,31 @@ class ReplySegment(MessageSegment):
         return {"id": str(self.msg_id)}
 
 
-class LongMsgSegment(MessageSegment):
-    def __init__(self, msg_id):
-        self.msg_id = msg_id
-        super().__init__("longmsg")
-
-    @property
-    def data(self) -> dict:
-        return {"id": str(self.msg_id)}
-
-
 # Message Classes
 class Message:
-    def __init__(self, seg_chain=None):
+    def __init__(self, seg_chain: list):
+        self.segment_chain = seg_chain
+
+    def startswith_atme(self):
+        return self.segment_chain and isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(
+            Configs.bot_profile[0])
+
+    def send_to_group(self, group_id):
+        SendGroupMessageEvent(self.raw_message, group_id).call()
+
+    @property
+    def raw_message(self):
+        chain = []
+        for seg in self.segment_chain:
+            chain.append(seg.raw_segment)
+        return chain
+
+
+class MessageBuilder(Message):
+    def __init__(self, seg_chain: list = None):
         if seg_chain is None:
             seg_chain = []
-        self.segment_chain = seg_chain
+        super().__init__(seg_chain)
 
     def text(self, text):
         self.segment_chain.append(TextSegment(text))
@@ -123,33 +132,19 @@ class Message:
         self.segment_chain.append(ReplySegment(msg_id))
         return self
 
-    def send_to_group(self, group_id):
-        SendGroupMessageEvent(self.raw_message, group_id).call()
-
-    def startswith_atme(self):
-        return self.segment_chain and isinstance(self.segment_chain[0], AtSegment) and self.segment_chain[0].qq == str(
-            Configs.bot_profile[0])
-
     def extend(self, other):
         if isinstance(other, MessageSegment):
             self.segment_chain.append(other)
             return self
-        elif isinstance(other, Message):
+        elif isinstance(other, MessageBuilder):
             self.segment_chain.extend(other.segment_chain)
             return self
-
-    @property
-    def raw_message(self):
-        chain = []
-        for seg in self.segment_chain:
-            chain.append(seg.raw_segment)
-        return chain
 
     def __add__(self, other):
         return self.extend(other)
 
 
-class ReceivedMessage(Message):
+class ReceivedMessage(MessageBuilder):
     def __init__(self, raw_msg, msg_id, sender):
         chain = []
         for seg in raw_msg:

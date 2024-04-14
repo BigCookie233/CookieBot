@@ -41,7 +41,7 @@ class SendActionEvent(EventManager.CancellableEvent):
 
     @property
     def data(self) -> dict:
-        return {}
+        raise NotImplementedError
 
 
 @EventManager.event_listener(priority=EventManager.Priority.LOWEST)
