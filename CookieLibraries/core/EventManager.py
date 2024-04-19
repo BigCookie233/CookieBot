@@ -72,7 +72,6 @@ class EventListener:
         self.__func = func
         self.__event_class = event_class
         self.__priority = priority
-        self.register()
 
     def __call__(self, event: Event):
         assert isinstance(event, self.__event_class), "invalid event for this listener"
@@ -128,7 +127,9 @@ def event_listener(func, event_class=None, priority=None) -> EventListener:
         priority = Priority.NORMAL
     if event_class is None and hasattr(func, "__annotations__"):
         event_class = next(iter(func.__annotations__.values()))
-    return EventListener(func, event_class, priority)
+    listener_obj = EventListener(func, event_class, priority)
+    listener_obj.register()
+    return listener_obj
 
 
 def unregister_listener(listener: Callable):
