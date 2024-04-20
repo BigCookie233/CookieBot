@@ -7,7 +7,7 @@ import warnings
 from enum import Enum
 from typing import Callable
 
-from CookieLibraries.core import LoggerUtils, Utils
+from CookieLibraries.core import LoggerUtils, Utils, ThreadPool
 
 _event_listeners = {}
 
@@ -32,6 +32,7 @@ class Event:
                 for listener in listeners:
                     yield listener
 
+    @ThreadPool.async_task
     def call(self):
         """
         Call event
