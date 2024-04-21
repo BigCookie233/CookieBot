@@ -64,28 +64,32 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self, func: Callable, event_class: type, priority: Priority = Priority.NORMAL):
-        assert callable(func), "the listener must be a callable object"
-        params_len = len(inspect.signature(func).parameters)
-        assert params_len == 1, f"the listener takes {params_len} positional arguments but 1 and only 1 will be given"
-        assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
-        assert isinstance(priority, Priority), "the priority must be a priority"
+    def __init__(self, func: Callable, priority: Priority = Priority.NORMAL):
+        assert (callable(func)
+                and len(inspect.signature(func).parameters) == 1
+                and hasattr(func, "__annotations__")), "invalid listener"
+        event_class = next(iter(func.__annotations__.values()))
+        assert isinstance(event_class, type) and issubclass(event_class, Event), "invalid event"
+        assert isinstance(priority, Priority), "invalid priority"
         self.__func = func
         self.__event_class = event_class
         self.__priority = priority
 
     def __call__(self, event: Event):
-        assert isinstance(event, self.__event_class), "invalid event for this listener"
+        assert isinstance(event, self.__event_class), "invalid event"
         self.__func(event)
 
     def register(self):
         _event_listeners.setdefault(self.__event_class, []).append(self)
         _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
+        return self
 
     def unregister(self):
         """
         Unregister the event listener
         """
+        assert (self.__event_class in _event_listeners
+                and self in _event_listeners[self.__event_class]), "the listener has not been registered yet"
         _event_listeners[self.__event_class].remove(self)
         if not _event_listeners[self.__event_class]:
             _event_listeners.pop(self.__event_class)
@@ -104,33 +108,25 @@ class EventListener:
 
     @priority.setter
     def priority(self, priority: Priority):
-        assert isinstance(priority, Priority), "the priority must be a priority"
+        assert isinstance(priority, Priority), "invalid priority"
         self.__priority = priority
         _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
 
     @event_class.setter
     def event_class(self, event_class: type):
-        assert isinstance(event_class, type) and issubclass(event_class, Event), "the event_class must be a event class"
+        assert isinstance(event_class, type) and issubclass(event_class, Event), "invalid event"
         self.unregister()
         self.__event_class = event_class
         self.register()
 
 
 @Utils.allow_default
-def event_listener(func, event_class=None, priority=None) -> EventListener:
+def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
     """
     Register event listener
     """
-    if isinstance(event_class, Priority) and priority is None:
-        priority = event_class
-        event_class = None
-    if priority is None:
-        priority = Priority.NORMAL
-    if event_class is None and hasattr(func, "__annotations__"):
-        event_class = next(iter(func.__annotations__.values()))
-    listener_obj = EventListener(func, event_class, priority)
-    listener_obj.register()
-    return listener_obj
+
+    return EventListener(func, priority).register()
 
 
 def unregister_listener(listener: Callable):

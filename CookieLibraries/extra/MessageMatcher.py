@@ -8,7 +8,7 @@ from CookieLibraries.core import EventManager
 from CookieLibraries.protocol import MessageUtils
 
 
-class KeywordListener(EventManager.EventListener):
+class MessageListener(EventManager.EventListener):
     def __init__(self, func, matcher):
         assert callable(matcher), "the matcher must be a callable object"
         params_len = len(inspect.signature(func).parameters)
@@ -16,17 +16,12 @@ class KeywordListener(EventManager.EventListener):
         self.matcher = matcher
 
         def call_func(event: MessageUtils.ReceiveGroupMessageEvent):
-            keyword = self.matcher(event)
-            if keyword is not None:
-                func(event.sender, event.group_id, keyword)
+            matched_message = self.matcher(event)
+            if matched_message is not None:
+                func(event.sender, event.group_id, matched_message)
 
-        super().__init__(call_func, MessageUtils.ReceiveGroupMessageEvent)
+        super().__init__(call_func)
 
 
-def keyword_listener(matcher):
-    def wrapper(func):
-        listener_obj = KeywordListener(func, matcher)
-        listener_obj.register()
-        return listener_obj
-
-    return wrapper
+def match_message(matcher):
+    return lambda func: MessageListener(func, matcher).register()

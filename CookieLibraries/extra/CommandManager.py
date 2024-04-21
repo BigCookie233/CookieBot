@@ -4,25 +4,23 @@
 
 import inspect
 
-from CookieLibraries.core import EventManager
+from CookieLibraries.extra import MessageMatcher
 from CookieLibraries.protocol import MessageUtils
-
+from CookieLibraries.extra import Matchers
 prefix = "/"
 
 
-class CommandExecutor(EventManager.EventListener):
+class CommandExecutor(MessageMatcher.MessageListener):
     def __init__(self, func, cmd):
         assert isinstance(cmd, str), "the command must be a str"
-        params_len = len(inspect.signature(func).parameters)
-        assert params_len == 3, f"the listener takes {params_len} positional arguments but 3 and only 3 will be given"
         self.cmd = cmd
 
-        def call_func(event: MessageUtils.ReceiveGroupMessageEvent):
-            if len(event.segment_chain) == 1 and isinstance(event.segment_chain[0], MessageUtils.TextSegment):
-                if event.segment_chain[0].text.startswith(f"{prefix}{self.cmd}"):
-                    func(event.sender, event.group_id, event.segment_chain[0].text.split(" ")[1:])
+        def matcher(event: MessageUtils.ReceiveGroupMessageEvent):
+            text = Matchers.startswith(f"{prefix}{self.cmd}")(event)
+            if text is not None:
+                return text.split(" ")[1:]
 
-        super().__init__(call_func, MessageUtils.ReceiveGroupMessageEvent)
+        super().__init__(func, matcher)
 
 
 def command_executor(cmd: str):
