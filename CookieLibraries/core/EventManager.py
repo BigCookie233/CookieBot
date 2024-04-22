@@ -3,7 +3,6 @@
 # Created by BigCookie233
 
 import inspect
-import warnings
 from enum import Enum
 from typing import Callable
 
@@ -27,10 +26,12 @@ class Event:
 
     @property
     def listeners(self):
+        ret = []
         for event_class, listeners in _event_listeners.items():
             if issubclass(self.__class__, event_class):
-                for listener in listeners:
-                    yield listener
+                ret.extend(listeners)
+        ret.sort(key=lambda obj: obj.priority.value)
+        return ret
 
     @ThreadPool.async_task
     def call(self):
@@ -81,7 +82,6 @@ class EventListener:
 
     def register(self):
         _event_listeners.setdefault(self.__event_class, []).append(self)
-        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
         return self
 
     def unregister(self):
@@ -110,7 +110,6 @@ class EventListener:
     def priority(self, priority: Priority):
         assert isinstance(priority, Priority), "invalid priority"
         self.__priority = priority
-        _event_listeners[self.__event_class].sort(key=lambda obj: obj.priority.value)
 
     @event_class.setter
     def event_class(self, event_class: type):
@@ -125,17 +124,4 @@ def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
     """
     Register event listener
     """
-
     return EventListener(func, priority).register()
-
-
-def unregister_listener(listener: Callable):
-    """
-    Unregister event listener
-
-    Args:
-        listener: the listener
-    """
-    warnings.warn("the unregister_listener() is deprecated", DeprecationWarning)
-    assert isinstance(listener, EventListener), "the listener must be a registered listener"
-    listener.unregister()
