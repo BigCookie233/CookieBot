@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import os
+import warnings
 
 import CookieLibraries.core.Cacher as Cacher
 import CookieLibraries.core.ThreadPool as ThreadPool
@@ -25,6 +26,8 @@ def write_file(path, data):
 
 
 def write_non_existent_file(path, data):
+    warnings.warn("the write_non_existent_file() is deprecated", DeprecationWarning)
+
     @ThreadPool.async_task
     def write_file_task():
         if not os.path.exists(path):
