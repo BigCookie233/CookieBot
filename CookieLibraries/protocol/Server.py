@@ -7,11 +7,11 @@ import logging
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-from CookieLibraries.core import ConfigManager, LoggerUtils
+from CookieLibraries.core import ConfigManager
+from CookieLibraries.core.DependencyInjector import autowired, get_instance
 from CookieLibraries.protocol import MessageUtils, BotController
 
 app = Flask("CookieBot")
-logger = None
 
 
 # 上报
@@ -23,7 +23,7 @@ def post_data():
         message = MessageUtils.ReceiveGroupMessageEvent(data['message'], data['message_id'],
                                                         BotController.Sender(data["sender"]),
                                                         data['group_id'])
-        logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
+        get_instance(logging.Logger).info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
             message.group_id, message.sender.nickname, message.sender.user_id, data['raw_message'],
             message.message_id))
         message.call()
@@ -31,9 +31,8 @@ def post_data():
     return "OK"
 
 
-def start():
-    global logger
-    logger = LoggerUtils.logger
+@autowired
+def start(logger: logging.Logger):
     # 禁用werkzeug的日志记录
     logging.getLogger('werkzeug').disabled = True
     try:

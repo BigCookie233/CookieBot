@@ -9,3 +9,4 @@ import CookieLibraries.core.LoggerUtils
 import CookieLibraries.core.PluginManager
 import CookieLibraries.core.ThreadPool
 import CookieLibraries.core.Utils
+import CookieLibraries.core.DependencyInjector

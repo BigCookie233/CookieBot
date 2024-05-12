@@ -9,27 +9,25 @@ from concurrent.futures import ThreadPoolExecutor
 import atexit
 
 from CookieLibraries.core import LoggerUtils
+from CookieLibraries.core.DependencyInjector import bean, get_instance, autowired
 
-thread_pool = None
 
-
-def init():
-    global thread_pool
+@bean
+def threadpool(logger: logging.Logger) -> ThreadPoolExecutor:
+    logger.info("Initializing Thread Pool")
     config = importlib.import_module(name="CookieLibraries.core.ConfigManager").GlobalConfig()
-    thread_pool = ThreadPoolExecutor(max_workers=config.max_workers)
+    return ThreadPoolExecutor(max_workers=config.max_workers)
 
 
 def async_task(func):
     def wrapper(*args, **kwargs):
-        if isinstance(thread_pool, ThreadPoolExecutor):
-            return thread_pool.submit(func, *args, **kwargs)
+        get_instance(ThreadPoolExecutor).submit(func, *args, **kwargs)
 
     return wrapper
 
 
 @atexit.register
-def shutdown():
-    if isinstance(thread_pool, ThreadPoolExecutor):
-        if isinstance(LoggerUtils.logger, logging.Logger):
-            LoggerUtils.logger.info("Closing Thread Pool")
-        thread_pool.shutdown()
+@autowired
+def shutdown(thread_pool: ThreadPoolExecutor, logger: logging.Logger):
+    logger.info("Closing Thread Pool")
+    thread_pool.shutdown()

@@ -2,18 +2,16 @@
 
 # Created by BigCookie233
 
+from logging import Logger
+
 import CookieLibraries.core
 import CookieLibraries.extra
 import CookieLibraries.protocol
 
 
-def init():
-    # Initialize Logger
-    print("Initializing Logger")
-    CookieLibraries.core.LoggerUtils.init("logs")
+@CookieLibraries.core.DependencyInjector.autowired
+def init(logger: Logger):
+    CookieLibraries.core.DependencyInjector.initialize_all_beans()
     # Initialize Controller
-    CookieLibraries.core.LoggerUtils.logger.info("Initializing Controller")
+    logger.info("Initializing Controller")
     CookieLibraries.protocol.BotController.init()
-    # Initialize Thread Pool
-    CookieLibraries.core.LoggerUtils.logger.info("Initializing Thread Pool")
-    CookieLibraries.core.ThreadPool.init()

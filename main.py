@@ -1,6 +1,8 @@
 # coding:utf-8
+
+from logging import Logger
+
 from CookieLibraries.core import *
-from CookieLibraries.extra import *
 from CookieLibraries.protocol import *
 
 VERSION = "2.2.0-dev"
@@ -10,7 +12,7 @@ if __name__ == '__main__':
     # Initialize
     CookieLibraries.init()
     # Start up
-    logger = LoggerUtils.logger
+    logger = DependencyInjector.get_instance(Logger)
     logger.info(f"Starting up CookieBot {VERSION}")
     # Load Config
     config = ConfigManager.GlobalConfig()

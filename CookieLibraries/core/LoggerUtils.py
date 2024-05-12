@@ -3,7 +3,7 @@
 # Created by BigCookie233
 
 import logging
-import logging.handlers as handlers
+from logging import handlers
 import os
 import traceback
 import warnings
@@ -11,12 +11,14 @@ import warnings
 import coloredlogs
 import sys
 
-from CookieLibraries.core import ExceptionHandlers
+from CookieLibraries.core.DependencyInjector import bean, autowired
+from CookieLibraries.core.ExceptionHandlers import exception_handler
 
-logger = None
 
-
-def init(logs_path):
+@bean
+def logger() -> logging.Logger:
+    print("Initializing Logger")
+    logs_path = "logs"
     # 日志颜色
     log_colors = {
         "DEBUG": "white",
@@ -36,7 +38,6 @@ def init(logs_path):
     coloredlogs.install(isatty=True, stream=sys.stdout, field_styles=log_field_styles, fmt=fmt, colors=log_colors)
 
     # 设置文件日志
-    global logger
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     log_name = "latest.log"
@@ -55,24 +56,25 @@ def init(logs_path):
     file_handler.namer = namer
     file_handler.suffix = "%Y-%m-%d.log"
     file_handler.setFormatter(logging.Formatter(fmt))
-    logger.addHandler(file_handler)
+    # logger.addHandler(file_handler)
+    return logger
 
 
 def log_exception(block=False):
     warnings.warn("the log_exception() is deprecated", DeprecationWarning)
 
-    def exception_logger(e):
-        if isinstance(logger, logging.Logger):
-            logger.error(f"An error occurred: {e}")
+    @autowired
+    def exception_logger(e, logger: logging.Logger):
+        logger.error(f"An error occurred: {e}")
         if not block:
             raise
 
-    return ExceptionHandlers.exception_handler(exception_logger)
+    return exception_handler(exception_logger)
 
 
 def traceback_exception(func):
-    def exception_logger():
-        if isinstance(logger, logging.Logger):
-            logger.error(traceback.format_exc())
+    @autowired
+    def exception_logger(logger: logging.Logger):
+        logger.error(traceback.format_exc())
 
-    return ExceptionHandlers.exception_handler(exception_logger)(func)
+    return exception_handler(exception_logger)(func)

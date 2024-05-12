@@ -7,8 +7,9 @@ import traceback
 
 import yaml
 
-import CookieLibraries.core.FileCacher as FileCacher
+from CookieLibraries.core import FileCacher
 from CookieLibraries.core import LoggerUtils
+from CookieLibraries.core.DependencyInjector import bean
 
 
 class Config:
@@ -44,3 +45,8 @@ class GlobalConfig(Config):
 class PluginConfig(Config):
     def __init__(self):
         super().__init__(os.path.join("configs", traceback.extract_stack()[-2].filename.rsplit(".", 1)[0] + ".yml"))
+
+
+@bean
+def global_config() -> GlobalConfig:
+    return GlobalConfig()

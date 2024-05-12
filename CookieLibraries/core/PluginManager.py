@@ -4,9 +4,11 @@
 
 import importlib
 import os
+from logging import Logger
 
 from CookieLibraries.core import EventManager
 from CookieLibraries.core import LoggerUtils
+from CookieLibraries.core.DependencyInjector import autowired
 
 
 class PluginEvent(EventManager.Event):
@@ -38,26 +40,29 @@ class Plugin:
         self.module_name = module_name
         self.package = package
 
-    def load(self):
+    @autowired
+    def load(self, logger: Logger = autowired):
         try:
             self.instance = importlib.import_module(name=self.module_name, package=self.package)
             self.name = self.instance.PLUGIN_NAME
             self.version = self.instance.PLUGIN_VERSION
         except Exception as e:
             self.unload()
-            LoggerUtils.logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
+            logger.error("An error occurred while loading {}: {}".format(self.module_name, e))
 
     def unload(self):
         self.instance = None
         self.name = None
         self.version = None
 
-    def enable(self):
-        LoggerUtils.logger.info(f"Enabling {self.name} v{self.version}")
+    @autowired
+    def enable(self, logger: Logger = autowired):
+        logger.info(f"Enabling {self.name} v{self.version}")
         PluginEnableEvent(self.instance).call()
 
-    def disable(self):
-        LoggerUtils.logger.info(f"Disabling {self.name} v{self.version}")
+    @autowired
+    def disable(self, logger: Logger = autowired):
+        logger.info(f"Disabling {self.name} v{self.version}")
         PluginDisableEvent(self.instance).call()
 
 
@@ -71,8 +76,8 @@ def load_plugin(name, package="plugins"):
 
 plugins = {}
 
-
-def load_plugins(package):
+@autowired
+def load_plugins(package, logger: Logger = autowired):
     global plugins
     try:
         for plugin_name in os.listdir(package):
@@ -80,5 +85,5 @@ def load_plugins(package):
                 if plugin_name.endswith(suffix):
                     load_plugin("." + plugin_name.split(".")[0], package)
     except Exception as e:
-        LoggerUtils.logger.error("An error occurred while loading plugins: {}".format(e))
+        logger.error("An error occurred while loading plugins: {}".format(e))
         raise
