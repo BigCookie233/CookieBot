@@ -7,6 +7,8 @@ import importlib
 import requests
 
 from CookieLibraries.core import EventManager, LoggerUtils, ThreadPool, Cacher
+from CookieLibraries.protocol.MessageUtils import Message
+
 
 base_url = None
 
@@ -32,6 +34,7 @@ def send_get_request(node: str):
         return response.json()["data"]
 
 
+# TODO: 重构信息获取
 @Cacher.cache
 def get_login_info():
     return send_get_request("get_login_info")
@@ -43,11 +46,23 @@ class Sender:
         self.nickname = data.get("nickname")
         self.sex = data.get("sex")
         self.age = data.get("age")
+
+    def reply(self, message: Message):
+        pass
+
+
+class GroupSender(Sender):
+    def __init__(self, data: dict, group_id):
+        super().__init__(data)
         self.card = data.get("card")
         self.area = data.get("area")
         self.level = data.get("level")
         self.role = data.get("role")
         self.title = data.get("title")
+        self.group_id = group_id
+
+    def reply(self, message: Message):
+        message.send_to_group(self.group_id)
 
 
 class SendActionEvent(EventManager.CancellableEvent):
@@ -61,7 +76,7 @@ class SendActionEvent(EventManager.CancellableEvent):
 
     @property
     def data(self) -> dict:
-        raise NotImplementedError
+        pass
 
 
 class SendGroupMessageEvent(SendActionEvent):
