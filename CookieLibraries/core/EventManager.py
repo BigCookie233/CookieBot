@@ -65,58 +65,49 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self, func: Callable, priority: Priority = Priority.NORMAL):
-        assert (callable(func)
-                and len(inspect.signature(func).parameters) == 1
-                and hasattr(func, "__annotations__")), "invalid listener"
-        event_class = next(iter(func.__annotations__.values()))
-        assert isinstance(event_class, type) and issubclass(event_class, Event), "invalid event"
-        assert isinstance(priority, Priority), "invalid priority"
-        self.__func = func
-        self.__event_class = event_class
-        self.__priority = priority
+    def __init__(self):
+        self.callback = None
+        self.__event = None
+        self.__priority = Priority.NORMAL
 
     def __call__(self, event: Event):
-        assert isinstance(event, self.__event_class), "invalid event"
-        self.__func(event)
+        return self.callback(event)
+
+    def on(self, event: type):
+        assert isinstance(event, type) and issubclass(event, Event), "invalid event"
+        self.__event = event
+        return self
+
+    def set_priority(self, priority: Priority):
+        assert isinstance(priority, Priority), "invalid priority"
+        self.__priority = priority
+        return self
+
+    def set_callback(self, callback):
+        self.callback = callback
+        return self
 
     def register(self):
-        _event_listeners.setdefault(self.__event_class, []).append(self)
+        _event_listeners.setdefault(self.__event, []).append(self)
         return self
 
     def unregister(self):
         """
         Unregister the event listener
         """
-        assert (self.__event_class in _event_listeners
-                and self in _event_listeners[self.__event_class]), "the listener has not been registered yet"
-        _event_listeners[self.__event_class].remove(self)
-        if not _event_listeners[self.__event_class]:
-            _event_listeners.pop(self.__event_class)
-
-    @property
-    def func(self):
-        return self.__func
+        assert (self.__event in _event_listeners
+                and self in _event_listeners[self.__event]), "the listener has not been registered yet"
+        _event_listeners[self.__event].remove(self)
+        if not _event_listeners[self.__event]:
+            _event_listeners.pop(self.__event)
 
     @property
     def priority(self) -> Priority:
         return self.__priority
 
     @property
-    def event_class(self) -> type:
-        return self.__event_class
-
-    @priority.setter
-    def priority(self, priority: Priority):
-        assert isinstance(priority, Priority), "invalid priority"
-        self.__priority = priority
-
-    @event_class.setter
-    def event_class(self, event_class: type):
-        assert isinstance(event_class, type) and issubclass(event_class, Event), "invalid event"
-        self.unregister()
-        self.__event_class = event_class
-        self.register()
+    def event(self) -> type:
+        return self.__event
 
 
 @Utils.allow_default
@@ -124,4 +115,5 @@ def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
     """
     Register event listener
     """
-    return EventListener(func, priority).register()
+    event = next(iter(func.__annotations__.values()))
+    return EventListener().set_callback(func).on(event).set_priority(priority).register()
