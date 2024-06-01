@@ -21,10 +21,9 @@ def post_data():
 
     if data['post_type'] == "message" and data['message_type'] == 'group':  # Group Message
         message = MessageUtils.ReceiveGroupMessageEvent(data['message'], data['message_id'],
-                                                        BotController.Sender(data["sender"]),
-                                                        data['group_id'])
+                                                        BotController.GroupSender(data["sender"], data['group_id']))
         get_instance(logging.Logger).info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
-            message.group_id, message.sender.nickname, message.sender.user_id, data['raw_message'],
+            message.sender.group_id, message.sender.nickname, message.sender.user_id, data['raw_message'],
             message.message_id))
         message.call()
 

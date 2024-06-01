@@ -166,6 +166,5 @@ class ReceiveMessageEvent(Message, EventManager.Event):
 
 
 class ReceiveGroupMessageEvent(ReceiveMessageEvent):
-    def __init__(self, raw_msg, msg_id, sender, group_id):
+    def __init__(self, raw_msg, msg_id, sender):
         super().__init__(raw_msg, msg_id, sender)
-        self.group_id = group_id
