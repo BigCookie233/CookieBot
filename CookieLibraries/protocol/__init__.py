@@ -2,6 +2,6 @@
 
 # Created by BigCookie233
 
-import CookieLibraries.protocol.BotController
-import CookieLibraries.protocol.MessageUtils
+from CookieLibraries.protocol.BotController import Sender
+from CookieLibraries.protocol.MessageUtils import Message, MessageBuilder, ReceiveGroupMessageEvent
 import CookieLibraries.protocol.Server
