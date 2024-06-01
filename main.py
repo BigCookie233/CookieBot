@@ -5,7 +5,7 @@ from logging import Logger
 from CookieLibraries.core import *
 from CookieLibraries.protocol import *
 
-VERSION = "2.2.0-dev"
+VERSION = "2.3.0-dev"
 
 # 主函数
 if __name__ == '__main__':
