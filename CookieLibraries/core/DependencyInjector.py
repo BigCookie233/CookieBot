@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import inspect
+from functools import wraps
 
 _beans = {}
 
@@ -31,6 +32,7 @@ def bean(func) -> Bean:
 
 
 def autowired(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         dependencies = {}
         sign = inspect.signature(func)

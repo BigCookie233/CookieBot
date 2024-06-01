@@ -3,6 +3,7 @@
 # Created by BigCookie233
 
 import inspect
+from functools import wraps
 from typing import Callable
 
 
@@ -11,6 +12,7 @@ def exception_handler(handler: Callable) -> Callable:
     params_len = len(inspect.signature(handler).parameters)
 
     def wrapper(func: Callable) -> Callable:
+        @wraps(func)
         def catcher(*args, **kwargs):
             try:
                 return func(*args, **kwargs)

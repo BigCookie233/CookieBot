@@ -5,10 +5,10 @@
 import importlib
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from functools import wraps
 
 import atexit
 
-from CookieLibraries.core import LoggerUtils
 from CookieLibraries.core.DependencyInjector import bean, get_instance, autowired
 
 
@@ -20,6 +20,7 @@ def threadpool(logger: logging.Logger) -> ThreadPoolExecutor:
 
 
 def async_task(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         get_instance(ThreadPoolExecutor).submit(func, *args, **kwargs)
 
