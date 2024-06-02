@@ -74,7 +74,7 @@ def log_exception(block=False):
 
 def traceback_exception(func):
     @autowired
-    def exception_logger(e, logger: logging.Logger):
+    def exception_logger(e, logger: logging.Logger = autowired):
         logger.error(traceback.format_exc())
 
     return exception_handler(exception_logger)(func)
