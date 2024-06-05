@@ -6,8 +6,8 @@ import importlib
 
 import requests
 
-from CookieLibraries.core import EventManager, LoggerUtils, ThreadPool, Cacher
-from CookieLibraries.protocol.MessageUtils import Message
+from ..core import EventManager, LoggerUtils, ThreadPool, Cacher
+from .MessageUtils import Message
 
 
 base_url = None

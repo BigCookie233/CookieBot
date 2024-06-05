@@ -9,7 +9,7 @@ from functools import wraps
 
 import atexit
 
-from CookieLibraries.core.DependencyInjector import bean, get_instance, autowired
+from .DependencyInjector import bean, get_instance, autowired
 
 
 @bean

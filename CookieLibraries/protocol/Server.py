@@ -7,9 +7,9 @@ import logging
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-from CookieLibraries.core import ConfigManager
-from CookieLibraries.core.DependencyInjector import autowired, get_instance
-from CookieLibraries.protocol import MessageUtils, BotController
+from ..core import ConfigManager
+from ..core.DependencyInjector import autowired, get_instance
+from . import MessageUtils, BotController
 
 app = Flask("CookieBot")
 

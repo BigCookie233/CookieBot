@@ -11,8 +11,8 @@ import warnings
 import coloredlogs
 import sys
 
-from CookieLibraries.core.DependencyInjector import bean, autowired
-from CookieLibraries.core.ExceptionHandlers import exception_handler
+from .DependencyInjector import bean, autowired
+from .ExceptionHandlers import exception_handler
 
 
 @bean

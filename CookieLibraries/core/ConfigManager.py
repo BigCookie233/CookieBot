@@ -2,14 +2,14 @@
 
 # Created by BigCookie233
 
-import os
 import traceback
+from os import path
 
 import yaml
 
-from CookieLibraries.core import FileCacher
-from CookieLibraries.core import LoggerUtils
-from CookieLibraries.core.DependencyInjector import bean
+from . import FileCacher
+from .DependencyInjector import bean
+from .LoggerUtils import traceback_exception
 
 
 class Config:
@@ -17,12 +17,12 @@ class Config:
         self.raw_config = None
         self.path = path
 
-    @LoggerUtils.log_exception()
+    @traceback_exception
     def reload(self):
         self.raw_config = yaml.load(FileCacher.read_file(self.path), yaml.FullLoader)
         return self
 
-    @LoggerUtils.log_exception()
+    @traceback_exception
     def save_default(self, default_config: str):
         if isinstance(default_config, str):
             FileCacher.write_non_existent_file(self.path, default_config)
@@ -44,7 +44,12 @@ class GlobalConfig(Config):
 
 class PluginConfig(Config):
     def __init__(self):
-        super().__init__(os.path.join("configs", traceback.extract_stack()[-2].filename.rsplit(".", 1)[0] + ".yml"))
+        super().__init__(path.join("configs",
+                                   f"{path.splitext(
+                                       path.split(
+                                           traceback.extract_stack()[-2].filename
+                                       )[-1]
+                                   )[0]}.yml"))
 
 
 @bean

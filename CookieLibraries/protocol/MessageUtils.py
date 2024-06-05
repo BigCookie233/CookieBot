@@ -2,8 +2,8 @@
 
 # Created by BigCookie233
 
-from CookieLibraries.core import EventManager
-from CookieLibraries.protocol import BotController
+from ..core import EventManager
+from . import BotController
 
 
 # Message Segment Classes

@@ -6,7 +6,9 @@ import inspect
 from enum import Enum
 from typing import Callable
 
-from CookieLibraries.core import LoggerUtils, Utils, ThreadPool
+from .LoggerUtils import traceback_exception
+from .ThreadPool import async_task
+from .Utils import allow_default
 
 _event_listeners = {}
 
@@ -33,13 +35,13 @@ class Event:
         ret.sort(key=lambda obj: obj.priority.value)
         return ret
 
-    @ThreadPool.async_task
+    @async_task
     def call(self):
         """
         Call event
         """
         for listener in self.listeners:
-            LoggerUtils.traceback_exception(listener)(self)
+            listener(self)
 
 
 class CancellableEvent(Event):
@@ -84,7 +86,7 @@ class EventListener:
         return self
 
     def set_callback(self, callback):
-        self.callback = callback
+        self.callback = traceback_exception(callback)
         return self
 
     def register(self):
@@ -110,7 +112,7 @@ class EventListener:
         return self.__event
 
 
-@Utils.allow_default
+@allow_default
 def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
     """
     Register event listener

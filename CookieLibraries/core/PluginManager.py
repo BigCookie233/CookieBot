@@ -6,12 +6,11 @@ import importlib
 import os
 from logging import Logger
 
-from CookieLibraries.core import EventManager
-from CookieLibraries.core import LoggerUtils
-from CookieLibraries.core.DependencyInjector import autowired
+from .EventManager import Event
+from .DependencyInjector import autowired
 
 
-class PluginEvent(EventManager.Event):
+class PluginEvent(Event):
     def __init__(self, instance):
         self.instance = instance
 
