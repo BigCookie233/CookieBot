@@ -3,6 +3,8 @@
 import inspect
 from functools import wraps
 
+from .Bootstrap import bootstrap
+
 _beans = {}
 
 
@@ -47,6 +49,7 @@ def autowired(func):
     return wrapper
 
 
+@bootstrap
 def initialize_all_beans():
     for i in _beans:
         get_instance(i)

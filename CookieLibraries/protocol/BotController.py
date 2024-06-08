@@ -1,19 +1,23 @@
 # coding: utf-8
 # Created by BigCookie233
-import importlib
+from logging import Logger
 
 import requests
 
 from ..core import EventManager, LoggerUtils, ThreadPool, Cacher
-from .MessageUtils import Message
-
+from ..core.Bootstrap import bootstrap
+from ..core.DependencyInjector import get_instance, autowired
 
 base_url = None
 
 
-def init():
+@bootstrap
+@autowired
+def init(logger: Logger):
     global base_url
-    config = importlib.import_module(name="CookieLibraries.core.ConfigManager").GlobalConfig()
+    logger.info("Initializing Controller")
+    from ..core.ConfigManager import GlobalConfig
+    config = get_instance(GlobalConfig)
     base_url = f"http://{config.api_host}:{config.api_port}/"
 
 
@@ -45,7 +49,7 @@ class Sender:
         self.sex = data.get("sex")
         self.age = data.get("age")
 
-    def reply(self, message: Message):
+    def reply(self, message):
         pass
 
 
@@ -59,7 +63,7 @@ class GroupSender(Sender):
         self.title = data.get("title")
         self.group_id = group_id
 
-    def reply(self, message: Message):
+    def reply(self, message):
         message.send_to_group(self.group_id)
 
 
@@ -74,7 +78,7 @@ class SendActionEvent(EventManager.CancellableEvent):
 
     @property
     def data(self) -> dict:
-        pass
+        raise NotImplementedError
 
 
 class SendGroupMessageEvent(SendActionEvent):

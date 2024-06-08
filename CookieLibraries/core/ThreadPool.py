@@ -13,7 +13,8 @@ from .DependencyInjector import bean, get_instance, autowired
 @bean
 def threadpool(logger: logging.Logger) -> ThreadPoolExecutor:
     logger.info("Initializing Thread Pool")
-    config = importlib.import_module(name="CookieLibraries.core.ConfigManager").GlobalConfig()
+    from .ConfigManager import GlobalConfig
+    config = get_instance(GlobalConfig)
     return ThreadPoolExecutor(max_workers=config.max_workers)
 
 
