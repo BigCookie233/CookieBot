@@ -10,12 +10,12 @@ VERSION = "2.3.0-dev"
 # 主函数
 if __name__ == '__main__':
     # Initialize
-    CookieLibraries.init()
+    Bootstrap.main()
     # Start up
     logger = DependencyInjector.get_instance(Logger)
     logger.info(f"Starting up CookieBot {VERSION}")
     # Load Config
-    config = ConfigManager.GlobalConfig()
+    config = DependencyInjector.get_instance(ConfigManager.GlobalConfig)
     # Load Plugins
     logger.info("Loading plugins...")
     PluginManager.load_plugins("plugins")
