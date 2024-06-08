@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 from ..core import EventManager
 from . import BotController
 

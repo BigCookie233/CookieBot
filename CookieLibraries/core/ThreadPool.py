@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 import importlib
 import logging
 from concurrent.futures import ThreadPoolExecutor

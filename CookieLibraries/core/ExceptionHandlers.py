@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 import inspect
 from functools import wraps
 from typing import Callable

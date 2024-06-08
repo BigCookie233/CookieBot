@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 import CookieLibraries.core.ConfigManager
 import CookieLibraries.core.EventManager
 import CookieLibraries.core.ExceptionHandlers

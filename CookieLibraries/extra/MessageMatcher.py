@@ -1,9 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
-import inspect
-
 from CookieLibraries.core import EventManager
 from CookieLibraries.protocol import ReceiveGroupMessageEvent
 

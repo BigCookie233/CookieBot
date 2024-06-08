@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 import pickle
 from typing import Callable
 

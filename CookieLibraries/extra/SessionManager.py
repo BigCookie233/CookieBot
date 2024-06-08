@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 from typing import Callable
 
 from CookieLibraries.extra.MessageMatcher import MessageListener

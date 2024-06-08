@@ -1,7 +1,5 @@
 # coding: utf-8
-
 # Created by BigCookie233
-
 import inspect
 from enum import Enum
 from typing import Callable

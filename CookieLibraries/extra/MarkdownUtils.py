@@ -1,11 +1,9 @@
 # coding: utf-8
+# Created by BigCookie233
 import json
 
 from CookieLibraries.core import Cacher
 from CookieLibraries.protocol import MessageUtils, BotController
-
-
-# Created by BigCookie233
 
 
 class LongMessage(MessageUtils.Message):
