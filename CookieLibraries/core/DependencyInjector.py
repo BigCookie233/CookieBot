@@ -21,7 +21,7 @@ class Bean:
         return self.__instance
 
 
-def get_instance(clazz) -> Bean:
+def get_instance(clazz):
     return _beans[clazz].instance
 
 
@@ -30,17 +30,18 @@ def bean(func) -> Bean:
 
 
 def autowired(func):
+    dependencies = {}
+    sign = inspect.signature(func)
+    mode = 0
+    for name, param in sign.parameters.items():
+        if param.default == autowired and mode == 0:
+            dependencies.clear()
+            mode = 1
+        if mode == 0 or param.default == autowired:
+            dependencies[name] = param.annotation
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        dependencies = {}
-        sign = inspect.signature(func)
-        mode = 0
-        for name, param in sign.parameters.items():
-            if param.default == autowired and mode == 0:
-                dependencies.clear()
-                mode = 1
-            if mode == 0 or param.default == autowired:
-                dependencies[name] = param.annotation
         return func(*args, **kwargs, **{key: _beans[value].instance for key, value in dependencies.items()})
 
     return wrapper
