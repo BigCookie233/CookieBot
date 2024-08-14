@@ -1,7 +1,7 @@
 # coding: utf-8
 # Created by BigCookie233
 from . import Bootstrap
-from . import ConfigManager
+from .ConfigManager import GlobalConfig
 from .DependencyInjector import provider, inject
 from . import EventManager
 from . import ExceptionHandlers

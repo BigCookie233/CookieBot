@@ -22,10 +22,6 @@ class Provider:
         return self.__instance
 
 
-def get_instance_A(clazz):
-    return _providers[clazz].get_instance()
-
-
 def provider(func) -> Provider:
     return Provider(func)
 
