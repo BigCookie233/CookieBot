@@ -17,15 +17,16 @@ class Config:
 
     @traceback_exception
     def reload(self):
-        self.raw_config = yaml.load(FileCacher.read_file(self.path), yaml.FullLoader)
+        with open(self.path, "r") as file:
+            self.raw_config = yaml.load(file.read(), yaml.FullLoader)
         return self
 
     @traceback_exception
     def save_default(self, default_config: str):
-        if isinstance(default_config, str):
-            FileCacher.write_non_existent_file(self.path, default_config)
-        else:
-            raise TypeError("default config must be a string")
+        assert isinstance(default_config, str), "default config must be a string"
+        if not path.exists(self.path):
+            with open(self.path, "w") as file:
+                file.write(default_config)
         return self
 
 
