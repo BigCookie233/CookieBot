@@ -6,11 +6,16 @@ from flask import Flask, request
 from werkzeug.serving import make_server
 
 from ..core import ConfigManager
-from ..core.DependencyInjector import autowired, get_instance
+from ..core.DependencyInjector import inject
 from . import MessageUtils, BotController
 
 app = Flask("CookieBot")
 
+@inject
+def log_msg(message, raw_message, logger: logging.Logger = inject):
+    logger.info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
+        message.sender.group_id, message.sender.nickname, message.sender.user_id, raw_message,
+        message.message_id))
 
 # 上报
 @app.route('/', methods=["POST"])
@@ -20,15 +25,13 @@ def post_data():
     if data['post_type'] == "message" and data['message_type'] == 'group':  # Group Message
         message = MessageUtils.ReceiveGroupMessageEvent(data['message'], data['message_id'],
                                                         BotController.GroupSender(data["sender"], data['group_id']))
-        get_instance(logging.Logger).info("收到群 {} 内 {}({}) 的消息: {} ({})".format(
-            message.sender.group_id, message.sender.nickname, message.sender.user_id, data['raw_message'],
-            message.message_id))
+        log_msg(message, data['raw_message'])
         message.call()
 
     return "OK"
 
 
-@autowired
+@inject
 def start(logger: logging.Logger):
     # 禁用werkzeug的日志记录
     logging.getLogger('werkzeug').disabled = True

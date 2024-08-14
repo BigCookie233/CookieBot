@@ -5,7 +5,7 @@ import os
 from logging import Logger
 
 from .EventManager import Event
-from .DependencyInjector import autowired
+from .DependencyInjector import inject
 
 
 class PluginEvent(Event):
@@ -37,8 +37,8 @@ class Plugin:
         self.module_name = module_name
         self.package = package
 
-    @autowired
-    def load(self, logger: Logger = autowired):
+    @inject
+    def load(self, logger: Logger = inject):
         try:
             self.instance = importlib.import_module(name=self.module_name, package=self.package)
             self.name = self.instance.PLUGIN_NAME
@@ -52,13 +52,13 @@ class Plugin:
         self.name = None
         self.version = None
 
-    @autowired
-    def enable(self, logger: Logger = autowired):
+    @inject
+    def enable(self, logger: Logger = inject):
         logger.info(f"Enabling {self.name} v{self.version}")
         PluginEnableEvent(self.instance).call()
 
-    @autowired
-    def disable(self, logger: Logger = autowired):
+    @inject
+    def disable(self, logger: Logger = inject):
         logger.info(f"Disabling {self.name} v{self.version}")
         PluginDisableEvent(self.instance).call()
 
@@ -73,8 +73,8 @@ def load_plugin(name, package="plugins"):
 
 plugins = {}
 
-@autowired
-def load_plugins(package, logger: Logger = autowired):
+@inject
+def load_plugins(package, logger: Logger = inject):
     global plugins
     try:
         for plugin_name in os.listdir(package):

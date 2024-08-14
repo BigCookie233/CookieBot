@@ -2,7 +2,7 @@
 # Created by BigCookie233
 from . import Bootstrap
 from . import ConfigManager
-from . import DependencyInjector
+from .DependencyInjector import provider, inject
 from . import EventManager
 from . import ExceptionHandlers
 from . import LoggerUtils

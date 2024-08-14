@@ -5,51 +5,50 @@ from functools import wraps
 
 from .Bootstrap import bootstrap
 
-_beans = {}
+_providers = {}
 
 
-class Bean:
+class Provider:
     def __init__(self, func):
-        assert callable(func), "invalid bean"
+        assert callable(func), "invalid provider"
         sign = inspect.signature(func)
         self.__func = func
         self.__instance = None
-        _beans[sign.return_annotation] = self
+        _providers[sign.return_annotation] = self
 
-    @property
-    def instance(self):
+    def get_instance(self):
         if self.__instance is None:
-            self.__instance = autowired(self.__func)()
+            self.__instance = inject(self.__func)()
         return self.__instance
 
 
-def get_instance(clazz):
-    return _beans[clazz].instance
+def get_instance_A(clazz):
+    return _providers[clazz].get_instance()
 
 
-def bean(func) -> Bean:
-    return Bean(func)
+def provider(func) -> Provider:
+    return Provider(func)
 
 
-def autowired(func):
+def inject(func):
     dependencies = {}
     sign = inspect.signature(func)
     mode = 0
     for name, param in sign.parameters.items():
-        if param.default == autowired and mode == 0:
+        if param.default == inject and mode == 0:
             dependencies.clear()
             mode = 1
-        if mode == 0 or param.default == autowired:
+        if mode == 0 or param.default == inject:
             dependencies[name] = param.annotation
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        return func(*args, **kwargs, **{key: _beans[value].instance for key, value in dependencies.items()})
+        return func(*args, **kwargs, **{key: _providers[value].get_instance() for key, value in dependencies.items()})
 
     return wrapper
 
 
 @bootstrap
-def initialize_all_beans():
-    for i in _beans:
-        get_instance(i)
+def initialize_all_providers():
+    for clazz in _providers:
+        _providers[clazz].get_instance()

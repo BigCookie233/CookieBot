@@ -6,18 +6,17 @@ import requests
 
 from ..core import EventManager, LoggerUtils, ThreadPool, Cacher
 from ..core.Bootstrap import bootstrap
-from ..core.DependencyInjector import get_instance, autowired
+from ..core.ConfigManager import GlobalConfig
+from ..core.DependencyInjector import inject
 
 base_url = None
 
 
 @bootstrap
-@autowired
-def init(logger: Logger):
+@inject
+def init(logger: Logger, config: GlobalConfig):
     global base_url
     logger.info("Initializing Controller")
-    from ..core.ConfigManager import GlobalConfig
-    config = get_instance(GlobalConfig)
     base_url = f"http://{config.api_host}:{config.api_port}/"
 
 

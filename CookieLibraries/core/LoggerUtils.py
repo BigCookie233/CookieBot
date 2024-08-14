@@ -10,12 +10,12 @@ import coloredlogs
 import sys
 
 from .Bootstrap import get_arg, register
-from .DependencyInjector import bean, autowired
+from .DependencyInjector import provider, inject
 from .ExceptionHandlers import exception_handler
 
 
 @register("--debug", "debug mode")
-@bean
+@provider
 def logger() -> logging.Logger:
     print("Initializing Logger")
     logs_path = "logs"
@@ -67,7 +67,7 @@ def logger() -> logging.Logger:
 def log_exception(block=False):
     warnings.warn("the log_exception() is deprecated", DeprecationWarning)
 
-    @autowired
+    @inject
     def exception_logger(e, logger: logging.Logger):
         logger.error(f"An error occurred: {e}")
         if not block:
@@ -77,8 +77,8 @@ def log_exception(block=False):
 
 
 def traceback_exception(func):
-    @autowired
-    def exception_logger(e, logger: logging.Logger = autowired):
+    @inject
+    def exception_logger(e, logger: logging.Logger = inject):
         logger.error(traceback.format_exc())
 
     return exception_handler(exception_logger)(func)

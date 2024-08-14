@@ -4,7 +4,7 @@ import os
 import warnings
 
 import CookieLibraries.core.Cacher as Cacher
-import CookieLibraries.core.ThreadPool as ThreadPool
+# import CookieLibraries.core.ThreadPool as ThreadPool
 
 
 @Cacher.cache()
@@ -14,7 +14,9 @@ def read_file(path):
 
 
 def write_file(path, data):
-    @ThreadPool.async_task
+    warnings.warn("the write_non_existent_file() is deprecated", DeprecationWarning)
+
+    # @ThreadPool.async_task
     def write_file_task():
         with open(path, "w") as file:
             file.write(data)
@@ -26,7 +28,7 @@ def write_file(path, data):
 def write_non_existent_file(path, data):
     warnings.warn("the write_non_existent_file() is deprecated", DeprecationWarning)
 
-    @ThreadPool.async_task
+    # @ThreadPool.async_task
     def write_file_task():
         if not os.path.exists(path):
             write_file(path, data)

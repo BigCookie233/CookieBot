@@ -6,7 +6,7 @@ from os import path
 import yaml
 
 from . import FileCacher
-from .DependencyInjector import bean
+from .DependencyInjector import provider
 from .LoggerUtils import traceback_exception
 
 
@@ -50,6 +50,6 @@ class PluginConfig(Config):
                                    )[0]}.yml"))
 
 
-@bean
+@provider
 def global_config() -> GlobalConfig:
     return GlobalConfig()
