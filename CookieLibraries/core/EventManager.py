@@ -1,8 +1,7 @@
 # coding: utf-8
 # Created by BigCookie233
-import inspect
 from enum import Enum
-from typing import Callable
+from threading import RLock
 
 from .LoggerUtils import traceback_exception
 from .ThreadPool import async_task
@@ -19,10 +18,25 @@ class Priority(Enum):
     LOWEST = 4
 
 
+class HookStage(Enum):
+    PRE = 0
+    POST = 1
+
+
+_hooks = {
+    HookStage.PRE: [],
+    HookStage.POST: []
+}
+
+
 class Event:
     """
     Event base class
     """
+
+    def __init__(self):
+        self.__dispatch_lock = RLock()
+        self.__skipped = False
 
     @property
     def listeners(self):
@@ -33,13 +47,25 @@ class Event:
         ret.sort(key=lambda obj: obj.priority.value)
         return ret
 
+    def skip_dispatch(self):
+        with self.__dispatch_lock:
+            self.__skipped = True
+
     @async_task
+    @traceback_exception
     def call(self):
         """
         Call event
         """
-        for listener in self.listeners:
-            listener(self)
+        with self.__dispatch_lock:
+            for listener in self.listeners:
+                self.__skipped = False
+                for hook_listener in _hooks[HookStage.PRE]:
+                    hook_listener(self, listener)
+                if not self.__skipped:
+                    listener(self)
+                for hook_listener in _hooks[HookStage.POST]:
+                    hook_listener(self, listener)
 
 
 class CancellableEvent(Event):
@@ -48,6 +74,7 @@ class CancellableEvent(Event):
     """
 
     def __init__(self):
+        super().__init__()
         self.__is_cancelled = False
 
     def cancel(self):
@@ -117,3 +144,13 @@ def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
     """
     event = next(iter(func.__annotations__.values()))
     return EventListener().set_callback(func).on(event).set_priority(priority).register()
+
+
+def hook(stage: HookStage):
+    assert isinstance(stage, HookStage), "invalid stage"
+
+    def wrapper(func):
+        _hooks[stage].append(func)
+        return func
+
+    return wrapper
