@@ -9,8 +9,6 @@ from CookieLibraries.protocol import *
 PLUGIN_NAME = "PingPong"
 PLUGIN_VERSION = "1.0-SNAPSHOT"
 
-logger = LoggerUtils.logger
-
 
 @command_executor("ping")
 def on_message(sender: Sender, params: list):
