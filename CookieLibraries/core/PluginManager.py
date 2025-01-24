@@ -4,12 +4,13 @@ import importlib
 import os
 from logging import Logger
 
-from .EventManager import Event
 from .DependencyInjector import inject
+from .EventManager import Event
 
 
 class PluginEvent(Event):
     def __init__(self, instance):
+        super().__init__()
         self.instance = instance
 
     @property
@@ -27,6 +28,14 @@ class PluginEnableEvent(PluginEvent):
 class PluginDisableEvent(PluginEvent):
     def __init__(self, instance):
         super().__init__(instance)
+
+
+class PreLoadPluginsEvent(Event):
+    pass
+
+
+class PostLoadPluginsEvent(Event):
+    pass
 
 
 class Plugin:
@@ -73,9 +82,11 @@ def load_plugin(name, package="plugins"):
 
 plugins = {}
 
+
 @inject
 def load_plugins(package, logger: Logger = inject):
     global plugins
+    PreLoadPluginsEvent().call()
     try:
         for plugin_name in os.listdir(package):
             for suffix in [".py", ".pyc"]:
@@ -84,3 +95,4 @@ def load_plugins(package, logger: Logger = inject):
     except Exception as e:
         logger.error("An error occurred while loading plugins: {}".format(e))
         raise
+    PostLoadPluginsEvent().call()

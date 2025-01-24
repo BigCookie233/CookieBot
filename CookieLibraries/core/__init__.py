@@ -9,3 +9,4 @@ from . import LoggerUtils
 from . import PluginManager
 from . import ThreadPool
 from . import Utils
+from .DaemonManager import daemon
