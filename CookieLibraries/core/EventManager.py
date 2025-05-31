@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Callable
 
 from .LoggerUtils import traceback_exception
-from .ThreadPool import async_task
+from .threadpool import async_task
 
 _event_listeners = {}
 

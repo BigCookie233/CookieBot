@@ -5,6 +5,6 @@ from CookieLibraries.framework.ConfigManager import GlobalConfig
 from .DependencyInjector import provider, inject
 from . import ExceptionHandlers
 from . import LoggerUtils
-from . import ThreadPool
+from . import threadpool
 from . import Utils
 from .DaemonManager import daemon
