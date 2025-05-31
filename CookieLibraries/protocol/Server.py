@@ -6,7 +6,7 @@ from flask import Flask, request
 from werkzeug.serving import make_server
 
 from ..framework import ConfigManager
-from ..core.DependencyInjector import inject
+from ..core.injector import inject
 from . import MessageUtils, BotController
 
 app = Flask("CookieBot")

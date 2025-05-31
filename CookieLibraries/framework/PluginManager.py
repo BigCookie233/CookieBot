@@ -4,8 +4,8 @@ import importlib
 import os
 from logging import Logger
 
-from CookieLibraries.core.DependencyInjector import inject
-from CookieLibraries.core.EventManager import Event
+from CookieLibraries.core.injector import inject
+from CookieLibraries.core.event_manager import Event
 
 
 class PluginEvent(Event):

@@ -1,10 +1,10 @@
 # coding: utf-8
 # Created by BigCookie233
-from CookieLibraries.core import EventManager
+from CookieLibraries.core import event_manager
 from CookieLibraries.protocol import ReceiveGroupMessageEvent
 
 
-class MessageListener(EventManager.EventListener):
+class MessageListener(event_manager.EventListener):
     def __init__(self, callback, matcher):
         super().__init__()
         self.matcher = matcher

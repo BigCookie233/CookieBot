@@ -4,7 +4,7 @@ import warnings
 from enum import Enum
 from typing import Callable
 
-from .LoggerUtils import traceback_exception
+from .logger import traceback_exception
 from .threadpool import async_task
 
 _event_listeners = {}
@@ -135,7 +135,7 @@ def event_listener(func) -> EventListener:
     return listener
 
 
-def priority(prio: Priority):
+def priority(prio: Priority) -> Callable:
     def wrapper(listener: EventListener) -> EventListener:
         assert isinstance(listener, EventListener), "invalid listener"
         listener.set_priority(prio)

@@ -2,8 +2,8 @@
 # Created by BigCookie233
 import threading
 
-from .Bootstrap import bootstrap
-from .LoggerUtils import traceback_exception
+from .bootstrap import initializer
+from .logger import traceback_exception
 
 _daemons = []
 
@@ -15,7 +15,7 @@ def daemon(func):
     return func
 
 
-@bootstrap
+@initializer
 def start():
     for thread in _daemons:
         thread.start()

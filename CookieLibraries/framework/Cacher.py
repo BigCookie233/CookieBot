@@ -3,7 +3,7 @@
 import pickle
 from typing import Callable
 
-from CookieLibraries.core.Utils import allow_default
+from CookieLibraries.extra.Utils import allow_default
 
 
 class Cacher:

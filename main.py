@@ -12,7 +12,7 @@ VERSION = "2.3.0-dev"
 @inject
 def main(logger: Logger, config: GlobalConfig):
     # Initialize
-    Bootstrap.main()
+    bootstrap.main()
     # Start up
     logger.info(f"Starting up CookieBot {VERSION}")
     # Load Plugins

@@ -10,7 +10,7 @@ _options = []
 _args = None
 
 
-def bootstrap(func: Callable) -> Callable:
+def initializer(func: Callable) -> Callable:
     _initializers.append(func)
     return func
 

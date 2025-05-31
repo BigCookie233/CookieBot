@@ -1,6 +1,6 @@
 # coding: utf-8
 # Created by BigCookie233
-from ..core import EventManager
+from ..core import event_manager
 from . import BotController
 
 
@@ -141,7 +141,7 @@ class MessageBuilder(Message):
         return self.extend(other)
 
 
-class ReceiveMessageEvent(Message, EventManager.Event):
+class ReceiveMessageEvent(Message, event_manager.Event):
     def __init__(self, raw_msg, msg_id, sender):
         chain = []
         for seg in raw_msg:

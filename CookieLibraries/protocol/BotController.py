@@ -4,16 +4,16 @@ from logging import Logger
 
 import requests
 
-from ..core import EventManager, LoggerUtils, ThreadPool
+from ..core import event_manager, logger, threadpool
 from ..framework import Cacher
-from ..core.Bootstrap import bootstrap
+from ..core.bootstrap import initializer
 from CookieLibraries.framework.ConfigManager import GlobalConfig
-from ..core.DependencyInjector import inject
+from ..core.injector import inject
 
 base_url = None
 
 
-@bootstrap
+@initializer
 @inject
 def init(logger: Logger, config: GlobalConfig):
     global base_url
@@ -21,15 +21,15 @@ def init(logger: Logger, config: GlobalConfig):
     base_url = f"http://{config.api_host}:{config.api_port}/"
 
 
-@ThreadPool.async_task
-@LoggerUtils.log_exception(True)
+@threadpool.async_task
+@logger.log_exception(True)
 def send_post_request(node: str, json):
     if isinstance(base_url, str):
         response = requests.post(base_url + node, json=json)
         return response.json()["data"]
 
 
-@LoggerUtils.log_exception(True)
+@logger.log_exception(True)
 def send_get_request(node: str):
     if isinstance(base_url, str):
         response = requests.get(base_url + node)
@@ -67,7 +67,7 @@ class GroupSender(Sender):
         message.send_to_group(self.group_id)
 
 
-class SendActionEvent(EventManager.CancellableEvent):
+class SendActionEvent(event_manager.CancellableEvent):
     def __init__(self, action):
         super().__init__()
         self.action = action

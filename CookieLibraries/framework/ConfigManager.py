@@ -1,13 +1,12 @@
 # coding: utf-8
 # Created by BigCookie233
 import traceback
+import yaml
 from os import path
 
-import yaml
-
+from CookieLibraries.core.logger import traceback_exception
+from CookieLibraries.core.injector import singleton
 from CookieLibraries.framework import FileCacher
-from CookieLibraries.core.DependencyInjector import provider
-from CookieLibraries.core.LoggerUtils import traceback_exception
 
 
 class Config:
@@ -51,6 +50,6 @@ class PluginConfig(Config):
                                    )[0]}.yml"))
 
 
-@provider
+@singleton
 def global_config() -> GlobalConfig:
     return GlobalConfig()
