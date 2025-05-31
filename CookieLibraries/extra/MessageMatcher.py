@@ -6,10 +6,8 @@ from CookieLibraries.protocol import ReceiveGroupMessageEvent
 
 class MessageListener(event_manager.EventListener):
     def __init__(self, callback, matcher):
-        super().__init__()
+        super().__init__(callback, ReceiveGroupMessageEvent)
         self.matcher = matcher
-        super().set_callback(callback)
-        super().on(ReceiveGroupMessageEvent)
 
     def __call__(self, event: ReceiveGroupMessageEvent):
         matched_message = self.matcher(event)

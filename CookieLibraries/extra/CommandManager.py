@@ -16,12 +16,13 @@ class CommandExecutor(MessageMatcher.MessageListener):
             text = Matchers.startswith(f"{prefix}{self.cmd}")(event)
             if text is not None:
                 return text.split(" ")[1:]
+            return None
 
         super().__init__(callback, matcher)
 
 
 def command_executor(cmd: str):
     def wrapper(func):
-        return CommandExecutor(func, cmd).on(ReceiveGroupMessageEvent).register()
+        return CommandExecutor(func, cmd).register()
 
     return wrapper
