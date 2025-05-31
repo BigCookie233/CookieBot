@@ -1,21 +1,20 @@
 # coding: utf-8
 # Created by BigCookie233
+import coloredlogs
 import logging
 import os
+import sys
 import traceback
 import warnings
 from logging import handlers
 
-import coloredlogs
-import sys
-
 from .Bootstrap import get_arg, register
-from .DependencyInjector import provider, inject
 from .ExceptionHandlers import exception_handler
+from .injector import inject, singleton
 
 
 @register("--debug", "debug mode")
-@provider
+@singleton
 def logger() -> logging.Logger:
     print("Initializing Logger")
     logs_path = "logs"

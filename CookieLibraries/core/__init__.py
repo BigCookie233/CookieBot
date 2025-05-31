@@ -2,7 +2,7 @@
 # Created by BigCookie233
 from . import Bootstrap
 from CookieLibraries.framework.ConfigManager import GlobalConfig
-from .DependencyInjector import provider, inject
+from .injector import provider, inject
 from . import ExceptionHandlers
 from . import LoggerUtils
 from . import threadpool

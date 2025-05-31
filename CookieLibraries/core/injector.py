@@ -3,8 +3,6 @@
 import inspect
 from functools import wraps
 
-from .Bootstrap import bootstrap
-
 _providers = {}
 
 
@@ -12,18 +10,34 @@ class Provider:
     def __init__(self, func):
         assert callable(func), "invalid provider"
         sign = inspect.signature(func)
-        self.__func = func
-        self.__instance = None
+        self.__provider = func
         _providers[sign.return_annotation] = self
 
-    def get_instance(self):
+    def get(self):
+        return inject(self.__provider)()
+
+    @property
+    def provider(self):
+        return self.__provider
+
+
+class SingletonProvider(Provider):
+    def __init__(self, func):
+        super().__init__(func)
+        self.__instance = None
+
+    def get(self):
         if self.__instance is None:
-            self.__instance = inject(self.__func)()
+            self.__instance = super().get()
         return self.__instance
 
 
 def provider(func) -> Provider:
     return Provider(func)
+
+
+def singleton(func) -> SingletonProvider:
+    return SingletonProvider(func)
 
 
 def inject(func):
@@ -39,12 +53,6 @@ def inject(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        return func(*args, **kwargs, **{key: _providers[value].get_instance() for key, value in dependencies.items()})
+        return func(*args, **kwargs, **{key: _providers[value].get() for key, value in dependencies.items()})
 
     return wrapper
-
-
-@bootstrap
-def initialize_all_providers():
-    for clazz in _providers:
-        _providers[clazz].get_instance()

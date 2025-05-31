@@ -5,22 +5,21 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 
-from .DependencyInjector import provider, inject
 from .config import Config
+from .injector import inject, singleton
 
 
 class ThreadPoolConfig(Config):
     def __init__(self):
-        super().__init__()
         self.max_workers = 5
 
 
-@provider
+@singleton
 def threadpool_config() -> ThreadPoolConfig:
     return ThreadPoolConfig()
 
 
-@provider
+@singleton
 def threadpool(logger: logging.Logger, config: ThreadPoolConfig) -> ThreadPoolExecutor:
     logger.info("Initializing Thread Pool")
     return ThreadPoolExecutor(max_workers=config.max_workers)

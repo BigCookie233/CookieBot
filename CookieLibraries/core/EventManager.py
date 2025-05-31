@@ -127,7 +127,7 @@ class EventListener:
 
 def event_listener(func) -> EventListener:
     """
-    Register event listener
+    Register an event listener
     """
     event = next(iter(func.__annotations__.values()))
     listener = EventListener(func, event)
