@@ -5,7 +5,6 @@ from threading import RLock
 
 from .LoggerUtils import traceback_exception
 from .ThreadPool import async_task
-from .Utils import allow_default
 
 _event_listeners = {}
 
@@ -92,27 +91,18 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self):
-        self.callback = None
-        self.__event = None
-        self.__priority = Priority.NORMAL
+    def __init__(self, callback, event: type, prio: Priority = Priority.NORMAL):
+        self.callback = traceback_exception(callback)
+        assert isinstance(event, type) and issubclass(event, Event), "invalid event"
+        self.__event = event
+        self.__priority = prio
 
     def __call__(self, event: Event):
         return self.callback(event)
 
-    def on(self, event: type):
-        assert isinstance(event, type) and issubclass(event, Event), "invalid event"
-        self.__event = event
-        return self
-
-    def set_priority(self, priority: Priority):
-        assert isinstance(priority, Priority), "invalid priority"
-        self.__priority = priority
-        return self
-
-    def set_callback(self, callback):
-        self.callback = traceback_exception(callback)
-        return self
+    def set_priority(self, prio: Priority):
+        assert isinstance(prio, Priority), "invalid priority"
+        self.__priority = prio
 
     def register(self):
         _event_listeners.setdefault(self.__event, []).append(self)
@@ -137,13 +127,21 @@ class EventListener:
         return self.__event
 
 
-@allow_default
-def event_listener(func, priority: Priority = Priority.NORMAL) -> EventListener:
+def event_listener(func) -> EventListener:
     """
     Register event listener
     """
     event = next(iter(func.__annotations__.values()))
-    return EventListener().set_callback(func).on(event).set_priority(priority).register()
+    return EventListener(func, event).register()
+
+
+def priority(prio: Priority):
+    def wrapper(listener: EventListener):
+        assert isinstance(listener, EventListener), "invalid listener"
+        listener.set_priority(prio)
+        return listener
+
+    return wrapper
 
 
 def hook(stage: HookStage):
