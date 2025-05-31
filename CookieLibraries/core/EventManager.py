@@ -1,5 +1,6 @@
 # coding: utf-8
 # Created by BigCookie233
+import warnings
 from enum import Enum
 from typing import Callable
 
@@ -33,12 +34,16 @@ class Event:
 
     @async_task
     @traceback_exception
-    def call(self):
+    def fire(self):
         """
-        Call event
+        Fire the event
         """
         for listener in self.listeners:
             listener(self)
+
+    def call(self):
+        warnings.warn("the call() is deprecated", DeprecationWarning)
+        self.fire()
 
 
 class CancellableEvent(Event):
@@ -51,7 +56,7 @@ class CancellableEvent(Event):
 
     def cancel(self):
         """
-        Cancel event
+        Cancel the event
         """
         self.__is_cancelled = True
 
@@ -64,26 +69,37 @@ class CancellableEvent(Event):
 
 
 class EventListener:
-    def __init__(self, callback, event: type, prio: Priority = Priority.NORMAL):
+    def __init__(self, callback: Callable, event: type, prio: Priority = Priority.NORMAL):
         self.callback = traceback_exception(callback)
         assert isinstance(event, type) and issubclass(event, Event), "invalid event"
         self.__event = event
         self.__priority = prio
 
-    def __call__(self, event: Event):
+    def call(self, event: Event):
+        """
+        Call the listener
+        """
         return self.callback(event)
 
+    def __call__(self, event: Event):
+        return self.call(event)
+
     def set_priority(self, prio: Priority):
+        """
+        Set the priority of the listener
+        """
         assert isinstance(prio, Priority), "invalid priority"
         self.__priority = prio
 
-    def register(self):
-        _event_listeners.setdefault(self.__event, []).append(self)
-        return self
-
-    def unregister(self):
+    def subscribe(self):
         """
-        Unregister the event listener
+        Subscribe the event
+        """
+        _event_listeners.setdefault(self.__event, []).append(self)
+
+    def unsubscribe(self):
+        """
+        Unsubscribe the event
         """
         assert (self.__event in _event_listeners
                 and self in _event_listeners[self.__event]), "the listener has not been registered yet"
@@ -99,17 +115,28 @@ class EventListener:
     def event(self) -> type:
         return self.__event
 
+    def register(self):
+        warnings.warn("the register() is deprecated", DeprecationWarning)
+        self.subscribe()
+        return self
+
+    def unregister(self):
+        warnings.warn("the unregister() is deprecated", DeprecationWarning)
+        self.unsubscribe()
+
 
 def event_listener(func) -> EventListener:
     """
     Register event listener
     """
     event = next(iter(func.__annotations__.values()))
-    return EventListener(func, event).register()
+    listener = EventListener(func, event)
+    listener.subscribe()
+    return listener
 
 
 def priority(prio: Priority):
-    def wrapper(listener: EventListener):
+    def wrapper(listener: EventListener) -> EventListener:
         assert isinstance(listener, EventListener), "invalid listener"
         listener.set_priority(prio)
         return listener
