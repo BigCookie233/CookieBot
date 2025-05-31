@@ -2,9 +2,8 @@
 # Created by BigCookie233
 import threading
 
-from .EventManager import event_listener
+from .Bootstrap import bootstrap
 from .LoggerUtils import traceback_exception
-from .PluginManager import PostLoadPluginsEvent
 
 _daemons = []
 
@@ -16,7 +15,7 @@ def daemon(func):
     return func
 
 
-@event_listener
-def start(event: PostLoadPluginsEvent):
+@bootstrap
+def start():
     for thread in _daemons:
         thread.start()
