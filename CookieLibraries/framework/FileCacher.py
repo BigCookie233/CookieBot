@@ -3,7 +3,7 @@
 import os
 import warnings
 
-import CookieLibraries.core.Cacher as Cacher
+import CookieLibraries.framework.Cacher as Cacher
 
 
 @Cacher.cache()

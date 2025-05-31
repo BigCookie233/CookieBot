@@ -4,9 +4,10 @@ from logging import Logger
 
 import requests
 
-from ..core import EventManager, LoggerUtils, ThreadPool, Cacher
+from ..core import EventManager, LoggerUtils, ThreadPool
+from ..framework import Cacher
 from ..core.Bootstrap import bootstrap
-from ..core.ConfigManager import GlobalConfig
+from CookieLibraries.framework.ConfigManager import GlobalConfig
 from ..core.DependencyInjector import inject
 
 base_url = None

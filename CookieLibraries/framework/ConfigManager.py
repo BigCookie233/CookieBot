@@ -5,9 +5,9 @@ from os import path
 
 import yaml
 
-from . import FileCacher
-from .DependencyInjector import provider
-from .LoggerUtils import traceback_exception
+from CookieLibraries.framework import FileCacher
+from CookieLibraries.core.DependencyInjector import provider
+from CookieLibraries.core.LoggerUtils import traceback_exception
 
 
 class Config:

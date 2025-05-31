@@ -2,7 +2,7 @@
 # Created by BigCookie233
 import json
 
-from CookieLibraries.core import Cacher
+from CookieLibraries.framework import Cacher
 from CookieLibraries.protocol import MessageUtils, BotController
 
 

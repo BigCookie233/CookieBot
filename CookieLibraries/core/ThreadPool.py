@@ -6,7 +6,7 @@ from functools import wraps
 
 import atexit
 
-from .ConfigManager import GlobalConfig
+from CookieLibraries.framework.ConfigManager import GlobalConfig
 from .DependencyInjector import provider, inject
 
 

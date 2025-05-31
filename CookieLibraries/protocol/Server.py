@@ -5,7 +5,7 @@ import logging
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-from ..core import ConfigManager
+from ..framework import ConfigManager
 from ..core.DependencyInjector import inject
 from . import MessageUtils, BotController
 
